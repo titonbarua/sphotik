@@ -1,0 +1,72 @@
+# vowels.
+o # অ
+A a # আ
+i # ই
+ee Ee eE EE I # ঈ
+oo u # উ
+U # ঊ
+rri # ঋ
+e E # এ
+OI # ঐ
+w W O # ও
+OU # ঔ
+
+# Consonants.
+k K # ক
+kh Kh # খ
+g G # গ
+gh Gh # ঘ
+Ng # ঙ
+c C # চ
+ch Ch # ছ
+j # জ
+jh # ঝ
+NG # ঞ
+T # ট
+Th # ঠ
+D # ড
+Dh # ঢ
+N # ণ
+t # ত
+th tH # থ
+d # দ
+dh # ধ
+n # ন
+p P # প
+f F ph Ph pH PH # ফ
+b B # ব
+v V bh bH Bh BH # ভ
+m M # ম
+z Z # য
+r # র
+l L # ল
+S sh # শ
+Sh # ষ
+s # স
+h H # হ
+R # ড়
+Rh # ঢ়
+y Y # য়
+
+# Special consonant.
+t`` # ৎ
+
+# Multi-letter transliterations.
+x # ক স
+gg # জ ঞ
+kkh kx # ক ষ
+nk # ঙ ক
+nc # ঞ চ
+nch # ঞ ছ
+nj # ঞ জ
+njh # ঞ  ঝ
+
+# Forced conjunct form for 'য'.
+``z ``Z # \u200D\u09CDয
+
+# The notorious "অ্যা".
+aZ # অ য আ
+
+# I think it's a good idea to have "naa" transliterated to "না", 
+# instead of "নাআ".
+aa Aa aA AA # আ
