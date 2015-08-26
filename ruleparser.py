@@ -1,7 +1,11 @@
 import re
+import itertools
+
+from conjunction_parser import parse_conjunction_line
 
 
 _ESCAPED_UNICHAR_REGEX = re.compile(r'\\u[0-9A-F]{4}', re.I)
+
 
 def _unescape_unichar(text):
     def replace(matchobj):
@@ -11,6 +15,7 @@ def _unescape_unichar(text):
 
 
 class Rule:
+
     def __init__(self, ruledir):
         self.ruledir = ruledir
         with open("avro_rule/transliterations.txt") as f:
@@ -26,7 +31,8 @@ class Rule:
         with open("avro_rule/conjunction_glue.txt") as f:
             print("Halant is: {}".format(
                 self._parse_conjunction_glue(f.read())))
-
+        with open("avro_rule/conjunctions.txt") as f:
+            print(self._parse_conjunctions(f.read()))
 
     def _parse_conjunction_glue(self, text):
         return _unescape_unichar(''.join(filter(
@@ -34,7 +40,17 @@ class Rule:
             map(str.strip, text.splitlines())
         ))).strip()
 
+    def _parse_conjunctions(self, text):
+        conjs = set()
+        for line in text.splitlines():
+            line = line.strip()
 
+            if not line or line.startswith('#'):
+                continue
+
+            conjs.update(parse_conjunction_line(line))
+
+        return conjs
 
     def _parse_transliterations(self, text):
         transmap = {}
@@ -42,12 +58,8 @@ class Rule:
         for line in text.splitlines():
             line = line.strip()
 
-            # Ignore empty lines.
-            if not line:
-                continue
-
-            # Ignore comments.
-            if line.startswith('#'):
+            # Ignore empty lines and comments.
+            if not line or line.startswith('#'):
                 continue
 
             try:
@@ -69,10 +81,7 @@ class Rule:
         for line in text.splitlines():
             line = line.strip()
 
-            if not line:
-                continue
-
-            if line.startswith('#'):
+            if not line or line.startswith('#'):
                 continue
 
             try:
@@ -93,10 +102,7 @@ class Rule:
         for line in text.splitlines():
             line = line.strip()
 
-            if not line:
-                continue
-
-            if line.startswith('#'):
+            if not line or line.startswith('#'):
                 continue
 
             chars.update(map(_unescape_unichar, line.split()))
@@ -104,7 +110,6 @@ class Rule:
         return chars
 
     _parse_vowelhosts = _parse_consonants
-    
 
 
 r = Rule('cc')
