@@ -1,6 +1,8 @@
 import re
 import itertools
+from os.path import join as pjoin
 
+from tree import TreeNode
 from conjunction_parser import parse_conjunction_line
 
 
@@ -15,24 +17,57 @@ def _unescape_unichar(text):
 
 
 class Rule:
+    TRANSLITERATIONS_FILE = 'transliterations.txt'
+    VOWELMAP_DIST2DIAC_FILE = 'vowelmap_dist2diac.txt'
+    VOWELMAP_DIAC2DIST_FILE = 'vowelmap_diac2dist.txt'
+    CONSONANTS_FILE = 'consonants.txt'
+    VOWELHOSTS_FILE = 'vowelhosts.txt'
+    CONJUNCTIONS_FILE = 'conjunctions.txt'
+    CONJUNCTION_GLUE_FILE = 'conjunction_glue.txt'
 
     def __init__(self, ruledir):
         self.ruledir = ruledir
-        with open("avro_rule/transliterations.txt") as f:
-            print(self._parse_transliterations(f.read()))
-        with open("avro_rule/vowelmap_dist2diac.txt") as f:
-            print(self._parse_vowelmap(f.read()))
-        with open("avro_rule/vowelmap_diac2dist.txt") as f:
-            print(self._parse_vowelmap(f.read()))
-        with open("avro_rule/consonants.txt") as f:
-            print(self._parse_consonants(f.read()))
-        with open("avro_rule/vowelhosts.txt") as f:
-            print(self._parse_vowelhosts(f.read()))
-        with open("avro_rule/conjunction_glue.txt") as f:
-            print("Halant is: {}".format(
-                self._parse_conjunction_glue(f.read())))
-        with open("avro_rule/conjunctions.txt") as f:
-            print(self._parse_conjunctions(f.read()))
+
+        self.transtree = TreeNode(key='root', parent=None)
+
+        self.vowelmap_dist2diac = {}
+        self.vowelmap_diac2dist = {}
+
+        self.conjtree = TreeNode(key='root', parent=None)
+        self.conjglue = None
+
+        self.consonants = set()
+        self.vowelhosts = set()
+        self.vowels = set()
+        self.vowels_distinct = set()
+        self.vowels_diacritic = set()
+
+        with open(pjoin(ruledir, self.TRANSLITERATIONS_FILE)) as f:
+            for k, v in self._parse_transliterations(f.read()).items():
+                self.transtree.set_value_for_path(list(k), v)
+
+        with open(pjoin(ruledir, self.VOWELMAP_DIST2DIAC_FILE)) as f:
+            self.vowelmap_dist2diac = self._parse_vowelmap(f.read())
+
+        with open(pjoin(ruledir, self.VOWELMAP_DIAC2DIST_FILE)) as f:
+            self.vowelmap_diac2dist = self._parse_vowelmap(f.read())
+
+        with open(pjoin(ruledir, self.CONSONANTS_FILE)) as f:
+            self.consonants = self._parse_consonants(f.read())
+
+        with open(pjoin(ruledir, self.VOWELHOSTS_FILE)) as f:
+            self.vowelhosts = self._parse_vowelhosts(f.read())
+
+        with open(pjoin(ruledir, self.CONJUNCTIONS_FILE)) as f:
+            for k in self._parse_conjunctions(f.read()):
+                self.conjtree.set_value_for_path(list(k), True)
+
+        with open(pjoin(ruledir, self.CONJUNCTION_GLUE_FILE)) as f:
+            self.conjglue = self._parse_conjunction_glue(f.read())
+
+        self.vowels_distinct = set(self.vowelmap_dist2diac.keys())
+        self.vowels_diacritic = set(self.vowelmap_diac2dist.keys())
+        self.vowels = self.vowels_distinct.union(self.vowels_diacritic)
 
     def _parse_conjunction_glue(self, text):
         return _unescape_unichar(''.join(filter(
@@ -112,4 +147,4 @@ class Rule:
     _parse_vowelhosts = _parse_consonants
 
 
-r = Rule('cc')
+r = Rule('avro_rule')
