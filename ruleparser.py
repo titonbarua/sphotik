@@ -11,8 +11,7 @@ class Rule:
     MODIFIER_FILE = 'modifier.txt'
     MODIFIER_MARK = '[MOD]'
     TRANSLITERATIONS_FILE = 'transliterations.txt'
-    VOWELMAP_DIST2DIAC_FILE = 'vowelmap_dist2diac.txt'
-    VOWELMAP_DIAC2DIST_FILE = 'vowelmap_diac2dist.txt'
+    VOWELMAP_FILE = 'vowelmap.txt'
     CONSONANTS_FILE = 'consonants.txt'
     VOWELHOSTS_FILE = 'vowelhosts.txt'
     PUNCTUATIONS_FILE = 'punctuations.txt'
@@ -24,20 +23,19 @@ class Rule:
 
         self.transtree = TreeNode(key='root', parent=None)
 
-        self.vowelmap_dist2diac = {}
-        self.vowelmap_diac2dist = {}
+        self.modifier = None
+
+        self.vowelmap = {}
+        self.vowels = set()
+        self.vowels_distinct = set()
+        self.vowels_diacritic = set()
 
         self.conjtree = TreeNode(key='root', parent=None)
         self.conjglue = None
 
-        self.modifier = None
-
         self.consonants = set()
         self.vowelhosts = set()
-        self.vowels = set()
         self.punctuations = set()
-        self.vowels_distinct = set()
-        self.vowels_diacritic = set()
 
         with open(pjoin(ruledir, self.MODIFIER_FILE)) as f:
             self.modifier = self._parse_char(f.read())
@@ -47,11 +45,12 @@ class Rule:
                     f.read(), self.modifier).items():
                 self.transtree.set_value_for_path(list(k), v)
 
-        with open(pjoin(ruledir, self.VOWELMAP_DIST2DIAC_FILE)) as f:
-            self.vowelmap_dist2diac = self._parse_vowelmap(f.read())
-
-        with open(pjoin(ruledir, self.VOWELMAP_DIAC2DIST_FILE)) as f:
-            self.vowelmap_diac2dist = self._parse_vowelmap(f.read())
+        with open(pjoin(ruledir, self.VOWELMAP_FILE)) as f:
+            self.vowelmap = self._parse_vowelmap(f.read())
+            self.vowels_distinct = set(self.vowelmap.keys())
+            self.vowels_diacritic = set(filter(
+                lambda x: len(x), self.vowelmap.values()))
+            self.vowels = self.vowels_distinct.union(self.vowels_diacritic)
 
         with open(pjoin(ruledir, self.CONSONANTS_FILE)) as f:
             self.consonants = self._parse_chardump(f.read())
@@ -69,10 +68,6 @@ class Rule:
         with open(pjoin(ruledir, self.CONJUNCTION_GLUE_FILE)) as f:
             self.conjglue = self._parse_char(f.read())
 
-        self.vowels_distinct = set(self.vowelmap_dist2diac.keys())
-        self.vowels_diacritic = set(self.vowelmap_diac2dist.keys())
-        self.vowels = self.vowels_distinct.union(self.vowels_diacritic)
-
         logging.debug(
             "Parsed rules from '{}':\n\t".format(ruledir) +
             "\n\t".join(
@@ -88,9 +83,8 @@ class Rule:
                      "vowelhosts",
                      "consonants",
                      "punctuations",
-                     "vowelmap_dist2diac",
-                     "vowelmap_diac2dist",
                      "conjglue",
+                     "vowelmap",
                      ))) +
             "\n\tconjtree:\n\t\t" +
             "\n\t\t".join(

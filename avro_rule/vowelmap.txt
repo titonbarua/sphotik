@@ -1,3 +1,4 @@
+# A map of vowel-forms, from distict to diacritic.
 অ
 আ \u09BE
 ই \u09BF

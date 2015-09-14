@@ -1,4 +1,4 @@
-# vowels.
+# Vowels (distinct).
 o # অ
 A a # আ
 i # ই
@@ -10,6 +10,19 @@ e E # এ
 OI # ঐ
 w W O # ও
 OU # ঔ
+
+# Forced diacritic form of vowels.
+o[MOD] # অ
+A[MOD] a[MOD] # আ
+i[MOD] # ই
+ee[MOD] Ee[MOD] eE[MOD] EE[MOD] I[MOD] # ঈ
+oo[MOD] u[MOD] # উ
+U[MOD] # ঊ
+rri[MOD] # ঋ
+e[MOD] E[MOD] # এ
+OI[MOD] # ঐ
+w[MOD] W[MOD] O[MOD] # ও
+OU[MOD] # ঔ
 
 # Consonants.
 k K # ক
