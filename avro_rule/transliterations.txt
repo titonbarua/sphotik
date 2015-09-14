@@ -48,10 +48,25 @@ R # ড়
 Rh # ঢ়
 y Y # য়
 
-# Special consonant.
+# Khanda ta.
 t`` # ৎ
 
-# Multi-letter transliterations.
+# Chandrabindu.
+^ # \u0981
+^^ # ^
+
+# Onuskar.
+ng # \u0982
+
+# Bishorgo.
+: # \u0983
+:: # :
+
+# Daari.
+. # \u0964
+.. # .
+
+# Some alternate transliterations.
 x # ক স
 gg # জ ঞ
 kkh kx # ক ষ

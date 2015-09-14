@@ -1,4 +1,5 @@
 import re
+import logging
 import itertools
 from os.path import join as pjoin
 
@@ -22,6 +23,7 @@ class Rule:
     VOWELMAP_DIAC2DIST_FILE = 'vowelmap_diac2dist.txt'
     CONSONANTS_FILE = 'consonants.txt'
     VOWELHOSTS_FILE = 'vowelhosts.txt'
+    PUNCTUATIONS_FILE = 'punctuations.txt'
     CONJUNCTIONS_FILE = 'conjunctions.txt'
     CONJUNCTION_GLUE_FILE = 'conjunction_glue.txt'
 
@@ -39,6 +41,7 @@ class Rule:
         self.consonants = set()
         self.vowelhosts = set()
         self.vowels = set()
+        self.punctuations = set()
         self.vowels_distinct = set()
         self.vowels_diacritic = set()
 
@@ -58,6 +61,9 @@ class Rule:
         with open(pjoin(ruledir, self.VOWELHOSTS_FILE)) as f:
             self.vowelhosts = self._parse_vowelhosts(f.read())
 
+        with open(pjoin(ruledir, self.PUNCTUATIONS_FILE)) as f:
+            self.punctuations = self._parse_punctuations(f.read())
+
         with open(pjoin(ruledir, self.CONJUNCTIONS_FILE)) as f:
             for k in self._parse_conjunctions(f.read()):
                 self.conjtree.set_value_for_path(list(k), True)
@@ -68,6 +74,25 @@ class Rule:
         self.vowels_distinct = set(self.vowelmap_dist2diac.keys())
         self.vowels_diacritic = set(self.vowelmap_diac2dist.keys())
         self.vowels = self.vowels_distinct.union(self.vowels_diacritic)
+
+        logging.debug(
+            "Parsed rules from '{}':\n\t".format(ruledir) +
+            "\n\t".join(map(
+                lambda x: "{}: {}".format(x, getattr(self, x)), (
+                    "vowels",
+                    "vowels_distinct",
+                    "vowels_diacritic",
+                    "vowelhosts",
+                    "consonants",
+                    "punctuations",
+                    "vowelmap_dist2diac",
+                    "vowelmap_diac2dist",
+                    "conjglue",
+                    "conjtree",
+                    "transtree",
+                ),
+            ))
+        )
 
     def _parse_conjunction_glue(self, text):
         return _unescape_unichar(''.join(filter(
@@ -131,7 +156,7 @@ class Rule:
 
         return vowelmap
 
-    def _parse_consonants(self, text):
+    def _parse_chardump(self, text):
         chars = set()
 
         for line in text.splitlines():
@@ -144,7 +169,10 @@ class Rule:
 
         return chars
 
-    _parse_vowelhosts = _parse_consonants
+    _parse_vowelhosts = _parse_consonants = _parse_punctuations = _parse_chardump
 
 
-r = Rule('avro_rule')
+if __name__ == '__main__':
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    rule = Rule('avro_rule')
