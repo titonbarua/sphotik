@@ -44,7 +44,7 @@ class TreeNode:
 
         while True:
             # Reached absolute root.
-            if current_node.parent == None:
+            if current_node.parent is None:
                 break
 
             # Reached relative root.
@@ -94,3 +94,15 @@ class TreeNode:
             pass
 
         return self
+
+    def __str__(self):
+        nodes = set()
+
+        def register(path, value, isleaf):
+            nodes.add("{} -> {}".format(" / ".join(path), value))
+            return value
+
+        for c in self.children.values():
+            c.transform(register)
+
+        return "\n".join(sorted(nodes))
