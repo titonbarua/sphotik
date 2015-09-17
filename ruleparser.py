@@ -17,6 +17,7 @@ class Rule:
     PUNCTUATIONS_FILE = 'punctuations.txt'
     CONJUNCTIONS_FILE = 'conjunctions.txt'
     CONJUNCTION_GLUE_FILE = 'conjunction_glue.txt'
+    SPECIAL_RULES_FILE = 'special_rules.txt'
 
     def __init__(self, ruledir):
         self.ruledir = ruledir
@@ -36,6 +37,8 @@ class Rule:
         self.consonants = set()
         self.vowelhosts = set()
         self.punctuations = set()
+
+        self.special_rules = []
 
         with open(pjoin(ruledir, self.MODIFIER_FILE)) as f:
             self.modifier = self._parse_char(f.read())
@@ -68,6 +71,9 @@ class Rule:
         with open(pjoin(ruledir, self.CONJUNCTION_GLUE_FILE)) as f:
             self.conjglue = self._parse_char(f.read())
 
+        with open(pjoin(ruledir, self.SPECIAL_RULES_FILE)) as f:
+            self.special_rules = self._parse_special_rules(f.read())
+
         logging.debug(
             "Parsed rules from '{}':\n\t".format(ruledir) +
             "\n\t".join(
@@ -93,7 +99,9 @@ class Rule:
             "\n\ttranstree:\n\t\t" +
             "\n\t\t".join(
                 str(
-                    self.transtree).splitlines()))
+                    self.transtree).splitlines()) +
+            "\n\tspecial_rules:\n\t\t" +
+            "\n\t\t".join(map(str, self.special_rules)))
 
     _ESCAPED_UNICHAR_REGEX = re.compile(r'\\u[0-9A-F]{4}', re.I)
 
@@ -142,7 +150,7 @@ class Rule:
             dstfrags = list(map(self._unescape_unichar, dst.split()))
 
             for sf in srcfrags:
-                transmap[sf] = dstfrags
+                transmap[sf] = tuple(dstfrags)
 
         return transmap
 
@@ -179,6 +187,24 @@ class Rule:
             chars.update(map(self._unescape_unichar, line.split()))
 
         return chars
+
+    def _parse_special_rules(self, text):
+        rules = []
+
+        for line in text.splitlines():
+            line = line.strip()
+
+            if not line or line.startswith('#'):
+                continue
+
+            try:
+                src, dst = line.split('#', maxsplit=1)
+            except ValueError:
+                src, dst = line, ''
+
+            rules.append((tuple(src.split()), tuple(dst.split())))
+
+        return rules
 
 
 if __name__ == '__main__':
