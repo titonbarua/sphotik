@@ -39,8 +39,13 @@ class Parser:
         else:
             self._insert_at_middle(text)
 
-    def delete_back(self, number):
-        assert number >= 0
+    def delete(self, steps):
+        from_ = self.cursor
+        to = max(0, self.cursor + steps)
+        start, end = min(from_, to), max(from_, to)
+        self.cord = self.cord[:start] + self.cord[end:]
+        if steps < 0:
+            self.cursor += steps
 
 
 if __name__ == "__main__":
@@ -51,4 +56,11 @@ if __name__ == "__main__":
     parser.insert('a')
     parser.insert('a')
     parser.insert('mar sonar bangla')
+    print(parser.cord)
+
+    parser.cursor += -3
+    parser.delete(-100)
+    print(parser.cord)
+
+    parser.delete(100)
     print(parser.cord)
