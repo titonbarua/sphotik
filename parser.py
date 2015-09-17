@@ -65,5 +65,5 @@ if __name__ == "__main__":
     parser.delete(100)
     print(parser.cord)
 
-    parser.insert('ami tomay valobashi')
+    parser.insert('ami` tomay valobashi')
     print(parser.cord)

@@ -9,13 +9,6 @@ class Transliterator:
         self._tree = tree
         self.longest_path_size = tree.get_longest_subpath_size()
 
-    def _make_bead(self, dst: str, src: str):
-        sbead = SrcBead(src)
-        if isinstance(dst, list) or isinstance(dst, tuple):
-            return reduce(operator.add, [DstBead(d, sbead) for d in dst])
-        else:
-            return DstBead(dst, sbead)
-
     def _transliterate_a_letter(self, source_str):
         candidate = source_str[:self.longest_path_size]
         while candidate:
@@ -25,9 +18,8 @@ class Transliterator:
                     candidate = candidate[:-1]
                     continue
 
-                converted_bead = self._make_bead(converted, candidate)
                 unconverted = source_str[len(candidate):]
-                return (converted_bead, unconverted)
+                return (converted, unconverted)
 
             except KeyError:
                 candidate = candidate[:-1]
@@ -36,23 +28,18 @@ class Transliterator:
             # Couldn't find a successful transliteration, which
             # implies that the first character of the roman string
             # is not part of any transliteration.
-            converted_bead = self._make_bead(source_str[0], source_str[0])
             unconverted = source_str[1:]
-            return (converted_bead, unconverted)
+            converted = Cord([
+                DstBead(source_str[0], SrcBead(source_str[0]))])
+            return (converted, unconverted)
 
     def _transliterate(self, source_str):
-        beads = []
+        converted = Cord()
         while source_str:
-            bead, source_str = self._transliterate_a_letter(source_str)
-            beads.append(bead)
+            newconv, source_str = self._transliterate_a_letter(source_str)
+            converted += newconv
 
-        result = reduce(operator.add, beads)
-
-        # We make sure that this function only retuns a Cord.
-        if isinstance(result, DstBead):
-            result = Cord((result,))
-
-        return result
+        return converted
 
     def __call__(self, source_str):
         return self._transliterate(source_str)

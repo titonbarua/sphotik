@@ -4,6 +4,7 @@ import itertools
 from os.path import join as pjoin
 
 from tree import TreeNode
+from utils import SrcBead, DstBead, Cord
 from conjunction_parser import parse_conjunction_line
 
 
@@ -141,16 +142,21 @@ class Rule:
             if not line or line.startswith('#'):
                 continue
 
-            try:
-                src, dst = line.split('#', maxsplit=1)
-            except ValueError:
-                src, dst = line, ''
+            parts = line.split('#', maxsplit=2)
+            src = parts[0]
+            dst = parts[1] if len(parts) > 1 else ''
+            flags = parts[2] if len(parts) > 2 else ''
 
             srcfrags = list(map(self._unescape_unichar, src.split()))
             dstfrags = list(map(self._unescape_unichar, dst.split()))
+            flaglist = list(filter(
+                lambda x: x, map(str.strip, flags.split('|'))))
 
             for sf in srcfrags:
-                transmap[sf] = tuple(dstfrags)
+                srcbead = SrcBead(sf)
+                dstcord = Cord([
+                    DstBead(v, srcbead, flaglist) for v in dstfrags])
+                transmap[sf] = dstcord
 
         return transmap
 

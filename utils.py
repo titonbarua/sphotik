@@ -16,16 +16,20 @@ class SrcBead:
 
 class DstBead:
 
-    def __init__(self, val, src):
+    def __init__(self, val, src, flags=()):
         self.v = val
         self.source = src
         self.source.add_destination(self)
+        self.flags = flags
 
     def __add__(self, other):
         return Cord((self, other))
 
     def __str__(self):
-        return "({}|{})".format(self.v, self.source.v)
+        return "({}/{}{})".format(
+            self.v,
+            self.source.v,
+            '|' + ('|'.join(self.flags)) if self.flags else '')
 
     def __repr__(self):
         return self.__str__()

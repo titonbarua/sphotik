@@ -12,17 +12,17 @@ w W O # ও
 OU # ঔ
 
 # Forced diacritic form of vowels.
-o[MOD] # অ
-A[MOD] a[MOD] # আ
-i[MOD] # ই
-ee[MOD] Ee[MOD] eE[MOD] EE[MOD] I[MOD] # ঈ
-oo[MOD] u[MOD] # উ
-U[MOD] # ঊ
-rri[MOD] # ঋ
-e[MOD] E[MOD] # এ
-OI[MOD] # ঐ
-w[MOD] W[MOD] O[MOD] # ও
-OU[MOD] # ঔ
+o[MOD] # অ                                   # FORCED_DIACRITIC
+A[MOD] a[MOD] # আ                            # FORCED_DIACRITIC
+i[MOD] # ই                                   # FORCED_DIACRITIC
+ee[MOD] Ee[MOD] eE[MOD] EE[MOD] I[MOD] # ঈ   # FORCED_DIACRITIC
+oo[MOD] u[MOD] # উ                           # FORCED_DIACRITIC
+U[MOD] # ঊ                                   # FORCED_DIACRITIC
+rri[MOD] # ঋ                                 # FORCED_DIACRITIC
+e[MOD] E[MOD] # এ                            # FORCED_DIACRITIC
+OI[MOD] # ঐ                                  # FORCED_DIACRITIC
+w[MOD] W[MOD] O[MOD] # ও                     # FORCED_DIACRITIC
+OU[MOD] # ঔ                                  # FORCED_DIACRITIC
 
 # Consonants.
 k K # ক
