@@ -25,11 +25,11 @@ class Parser:
             except IndexError:
                 break
 
-        self.cord = self.transliterator(reverted + text)
+        self.cord = self.cord + self.transliterator(reverted + text)
         self.cursor = len(self.cord)
 
     def _insert_at_middle(self, text):
-        newcord = self.transliterate(text)
+        newcord = self.transliterator(text)
         self.cord = newcord
         self.cursor += len(newcord)
 
@@ -45,7 +45,7 @@ class Parser:
         start, end = min(from_, to), max(from_, to)
         self.cord = self.cord[:start] + self.cord[end:]
         if steps < 0:
-            self.cursor += steps
+            self.cursor = max(0, self.cursor + steps)
 
 
 if __name__ == "__main__":
@@ -63,4 +63,7 @@ if __name__ == "__main__":
     print(parser.cord)
 
     parser.delete(100)
+    print(parser.cord)
+
+    parser.insert('ami tomay valobashi')
     print(parser.cord)
