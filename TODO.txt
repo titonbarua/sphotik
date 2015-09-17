@@ -1,3 +1,16 @@
 TODO
 ====
-* Implement a custom rule system ( magic rules ) where rules can be defined with char classes.
+* Write the main transliteration pipeline.
+  Decisions to make:
+     - Do we need character pinning?
+
+       We invented character pinning for all those
+       planned stupid features like reverse transliterations
+       and raw-cursors. Other than that, character pinning
+       is useless. So, No; we don't need character pinning.
+
+     - Do we need character suggestions?
+
+       Do people really want character suggestions? I don't know.
+       If it is trivial, we should do it. Recursive multilayer
+       character suggestion is a no-no.

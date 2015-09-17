@@ -1,8 +1,17 @@
+import weakref
+
+
 class SrcBead:
 
     def __init__(self, val):
         self.v = val
         self.destinations = []
+
+    def _remove_destination(self, weakref_of_dst):
+        self.destinations.remove(weakref_of_dst)
+
+    def add_destination(self, dst):
+        self.destinations.append(weakref.ref(dst, self._remove_destination))
 
 
 class DstBead:
@@ -10,7 +19,7 @@ class DstBead:
     def __init__(self, val, src):
         self.v = val
         self.source = src
-        self.source.destinations.append(self)
+        self.source.add_destination(self)
 
     def __add__(self, other):
         return Cord((self, other))

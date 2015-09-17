@@ -1,6 +1,6 @@
 import operator
 from functools import reduce
-from utils import SrcBead, DstBead
+from utils import SrcBead, DstBead, Cord
 
 
 class Transliterator:
@@ -46,7 +46,13 @@ class Transliterator:
             bead, source_str = self._transliterate_a_letter(source_str)
             beads.append(bead)
 
-        return reduce(operator.add, beads)
+        result = reduce(operator.add, beads)
+
+        # We make sure that this function only retuns a Cord.
+        if isinstance(result, DstBead):
+            result = Cord((result,))
+
+        return result
 
     def __call__(self, source_str):
         return self._transliterate(source_str)
