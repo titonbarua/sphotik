@@ -1,5 +1,6 @@
 
 from ruleparser import Rule
+from vowelshaper import Vowelshaper
 from utils import SrcBead, DstBead, Cord
 from transliterator import Transliterator
 
@@ -65,5 +66,9 @@ if __name__ == "__main__":
     parser.delete(100)
     print(parser.cord)
 
-    parser.insert('ami` tomay valobashi')
+    parser.insert('a`mi` tOmay valobashi')
     print(parser.cord)
+
+    vs = Vowelshaper(rule)
+    print(vs(parser.cord))
+    print(vs(parser.cord).text)

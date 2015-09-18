@@ -60,3 +60,7 @@ class Cord:
 
     def __str__(self):
         return "".join(map(str, self._data))
+
+    @property
+    def text(self):
+        return "".join([x.v for x in self._data])
