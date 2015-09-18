@@ -15,4 +15,4 @@ TODO
        If it is trivial, we should do it. Recursive multilayer
        character suggestion is a no-no.
 
-* Add conjunction creator.
+* Implement the special rule system.

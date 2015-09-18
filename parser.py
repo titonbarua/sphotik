@@ -1,5 +1,6 @@
 
 from ruleparser import Rule
+from conjunctor import Conjunctor
 from vowelshaper import Vowelshaper
 from utils import SrcBead, DstBead, Cord
 from transliterator import Transliterator
@@ -11,11 +12,13 @@ class Parser:
         self.rule = rule
         self.transliterator = Transliterator(rule.transtree)
         self.vowelshaper = Vowelshaper(rule.vowels, rule.vowelhosts)
+        self.conjunctor = Conjunctor(rule.conjtree)
         self.cord = cord
         self.cursor = len(cord)
 
     def _adjust_flags(self):
         self.cord = self.vowelshaper(self.cord)
+        self.cord = self.conjunctor(self.cord)
 
     def _insert_at_rightmost(self, text):
         lps = self.transliterator.longest_path_size
@@ -66,6 +69,10 @@ class Parser:
                 output += self._to_diacritic(bead).v
                 continue
 
+            if 'CONJOINED' in bead.flags:
+                output += self.rule.conjglue + bead.v
+                continue
+
             output += bead.v
 
         return output
@@ -95,5 +102,9 @@ if __name__ == "__main__":
     print(parser.cord)
 
     parser.insert('a`mi` tOmay valobashi')
+    print(parser.cord)
+    print(parser.text)
+
+    parser.insert(' kosTe achi skondho')
     print(parser.cord)
     print(parser.text)
