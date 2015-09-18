@@ -1,4 +1,5 @@
 import operator
+from copy import deepcopy
 from functools import reduce
 from utils import SrcBead, DstBead, Cord
 
@@ -19,7 +20,7 @@ class Transliterator:
                     continue
 
                 unconverted = source_str[len(candidate):]
-                return (converted, unconverted)
+                return (deepcopy(converted), unconverted)
 
             except KeyError:
                 candidate = candidate[:-1]
