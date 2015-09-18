@@ -11,8 +11,15 @@ TODO
 
      - Do we need character suggestions?
 
-       Do people really want character suggestions? I don't know.
-       If it is trivial, we should do it. Recursive multilayer
-       character suggestion is a no-no.
+       No. We don't need character suggestion system. This
+       was a messed up feature that delayed all the previous
+       releases.
+
 
 * Implement the special rule system.
+
+* Implement proper history system. Please don't do all the security
+  shenanigans like previous iterations.
+
+* Implement autocorrection ( magic word transliterations ). Aren't
+  autocorrections and history basically same thing?

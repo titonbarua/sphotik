@@ -64,13 +64,20 @@ class Parser:
     def text(self):
         output = ""
         for bead in self.cord:
+            # Change vowels to diacritic form when flagged.
             if (('DIACRITIC' in bead.flags) or
                     ('FORCED_DIACRITIC' in bead.flags)):
                 output += self._to_diacritic(bead).v
                 continue
 
+            # Add a conjunction glue in front of every
+            # conjoined character.
             if 'CONJOINED' in bead.flags:
                 output += self.rule.conjglue + bead.v
+                continue
+
+            # Hide the modifier character.
+            if bead.v == self.rule.modifier:
                 continue
 
             output += bead.v
@@ -106,5 +113,6 @@ if __name__ == "__main__":
     print(parser.text)
 
     parser.insert(' kosTe achi skondho')
+    parser.insert(' sondhZa kingkortobZbimUR obZy h`Oya am`ra')
     print(parser.cord)
     print(parser.text)
