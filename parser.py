@@ -10,7 +10,7 @@ class Parser:
     def __init__(self, rule, cord=Cord()):
         self.rule = rule
         self.transliterator = Transliterator(rule.transtree)
-        self.vowelshaper = Vowelshaper(rule)
+        self.vowelshaper = Vowelshaper(rule.vowels, rule.vowelhosts)
         self.cord = cord
         self.cursor = len(cord)
 

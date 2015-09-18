@@ -22,6 +22,12 @@ class DstBead:
         self.source.add_destination(self)
         self.flags = set(flags)
 
+    def add_flags(self, *args):
+        self.flags.update(args)
+
+    def remove_flags(self, *args):
+        self.flags.difference_update(args)
+
     def __add__(self, other):
         return Cord((self, other))
 
