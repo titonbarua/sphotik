@@ -7,10 +7,15 @@ from transliterator import Transliterator
 
 class Parser:
 
-    def __init__(self, transliterator, cord=Cord()):
-        self.transliterator = transliterator
+    def __init__(self, rule, cord=Cord()):
+        self.rule = rule
+        self.transliterator = Transliterator(rule.transtree)
+        self.vowelshaper = Vowelshaper(rule)
         self.cord = cord
         self.cursor = len(cord)
+
+    def _adjust_flags(self):
+        self.cord = self.vowelshaper(self.cord)
 
     def _insert_at_rightmost(self, text):
         lps = self.transliterator.longest_path_size
@@ -40,6 +45,8 @@ class Parser:
         else:
             self._insert_at_middle(text)
 
+        self._adjust_flags()
+
     def delete(self, steps):
         from_ = self.cursor
         to = max(0, self.cursor + steps)
@@ -48,11 +55,32 @@ class Parser:
         if steps < 0:
             self.cursor = max(0, self.cursor + steps)
 
+        self._adjust_flags()
+
+    @property
+    def text(self):
+        output = ""
+        for bead in self.cord:
+            if (('DIACRITIC' in bead.flags) or
+                    ('FORCED_DIACRITIC' in bead.flags)):
+                output += self._to_diacritic(bead).v
+                continue
+
+            output += bead.v
+
+        return output
+
+    def _to_diacritic(self, bead):
+        try:
+            diac = self.rule.vowelmap[bead.v]
+            return DstBead(diac, bead.source, bead.flags)
+        except KeyError:
+            return bead
+
 
 if __name__ == "__main__":
     rule = Rule('avro_rule')
-    trans = Transliterator(rule.transtree)
-    parser = Parser(trans)
+    parser = Parser(rule)
 
     parser.insert('a')
     parser.insert('a')
@@ -68,7 +96,4 @@ if __name__ == "__main__":
 
     parser.insert('a`mi` tOmay valobashi')
     print(parser.cord)
-
-    vs = Vowelshaper(rule)
-    print(vs(parser.cord))
-    print(vs(parser.cord).text)
+    print(parser.text)

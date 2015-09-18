@@ -16,11 +16,11 @@ class SrcBead:
 
 class DstBead:
 
-    def __init__(self, val, src, flags=()):
+    def __init__(self, val, src, flags=set()):
         self.v = val
         self.source = src
         self.source.add_destination(self)
-        self.flags = flags
+        self.flags = set(flags)
 
     def __add__(self, other):
         return Cord((self, other))
