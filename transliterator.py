@@ -1,7 +1,10 @@
 import operator
+import unittest
 from copy import deepcopy
 from functools import reduce
 from utils import SrcBead, DstBead, Cord
+
+from tree import TreeNode
 
 
 class Transliterator:
@@ -44,3 +47,26 @@ class Transliterator:
 
     def __call__(self, source_str):
         return self._transliterate(source_str)
+
+
+class _TestTransliterator(unittest.TestCase):
+
+    def setUp(self):
+        def cc(s, d):
+            """ A convenience function to create a single-beaded Cord."""
+            return Cord([DstBead(d, SrcBead(s))])
+
+        t = TreeNode("root")
+        t.set_value_for_path("a", cc("a", "1"))
+        t.set_value_for_path("aa", cc("aa", "2"))
+        t.set_value_for_path("b", cc("b", "3"))
+        t.set_value_for_path("abc", cc("abc", "4"))
+
+        self._trans = Transliterator(t)
+
+    def test_simple(self):
+        self.assertTrue(self._trans('aaabcba').text, "2431")
+        self.assertTrue(self._trans('aaa dbcba').text, "21 d3c21")
+        self.assertTrue(self._trans('abcdefg').text, "4defg")
+        self.assertTrue(self._trans('aaaaaaa').text, "2221")
+        self.assertTrue(self._trans('abcab c').text, "413 c")

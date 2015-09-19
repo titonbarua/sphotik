@@ -1,5 +1,17 @@
 TODO
 ====
+* Before we can make the ibus boiler plate running,
+  we need to package the current code. Otherwise,
+  my sanity will be eclipsed.
+
+    - Write a setup.py file.
+
+    - Oraganize the adhoc tests.
+
+    - Write a Readme file.
+
+* Make the ibus-boiler plate up and running.
+
 * Write the main transliteration pipeline.
   Decisions to make:
      - Do we need character pinning?
