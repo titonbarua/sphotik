@@ -1,11 +1,12 @@
 import re
 import logging
 import itertools
+from pkgutil import get_data
 from os.path import join as pjoin
 
-from tree import TreeNode
-from utils import SrcBead, DstBead, Cord
-from conjunction_parser import parse_conjunction_line
+from .tree import TreeNode
+from .utils import SrcBead, DstBead, Cord
+from .conjunction_parser import parse_conjunction_line
 
 
 class Rule:
@@ -20,8 +21,8 @@ class Rule:
     CONJUNCTION_GLUE_FILE = 'conjunction_glue.txt'
     SPECIAL_RULES_FILE = 'special_rules.txt'
 
-    def __init__(self, ruledir):
-        self.ruledir = ruledir
+    def __init__(self, rulename):
+        ruledir = pjoin('rules', rulename)
 
         self.transtree = TreeNode(key='root', parent=None)
 
@@ -41,39 +42,47 @@ class Rule:
 
         self.special_rules = []
 
-        with open(pjoin(ruledir, self.MODIFIER_FILE)) as f:
-            self.modifier = self._parse_char(f.read())
+        fdata = get_data(
+            __package__, pjoin(ruledir, self.MODIFIER_FILE)).decode()
+        self.modifier = self._parse_char(fdata)
 
-        with open(pjoin(ruledir, self.TRANSLITERATIONS_FILE)) as f:
-            for k, v in self._parse_transliterations(
-                    f.read(), self.modifier).items():
-                self.transtree.set_value_for_path(list(k), v)
+        fdata = get_data(
+            __package__, pjoin(ruledir, self.TRANSLITERATIONS_FILE)).decode()
+        for k, v in self._parse_transliterations(fdata, self.modifier).items():
+            self.transtree.set_value_for_path(list(k), v)
 
-        with open(pjoin(ruledir, self.VOWELMAP_FILE)) as f:
-            self.vowelmap = self._parse_vowelmap(f.read())
-            self.vowels_distinct = set(self.vowelmap.keys())
-            self.vowels_diacritic = set(filter(
-                lambda x: len(x), self.vowelmap.values()))
-            self.vowels = self.vowels_distinct.union(self.vowels_diacritic)
+        fdata = get_data(
+            __package__, pjoin(ruledir, self.VOWELMAP_FILE)).decode()
+        self.vowelmap = self._parse_vowelmap(fdata)
+        self.vowels_distinct = set(self.vowelmap.keys())
+        self.vowels_diacritic = set(filter(
+            lambda x: len(x), self.vowelmap.values()))
+        self.vowels = self.vowels_distinct.union(self.vowels_diacritic)
 
-        with open(pjoin(ruledir, self.CONSONANTS_FILE)) as f:
-            self.consonants = self._parse_chardump(f.read())
+        fdata = get_data(
+            __package__, pjoin(ruledir, self.CONSONANTS_FILE)).decode()
+        self.consonants = self._parse_chardump(fdata)
 
-        with open(pjoin(ruledir, self.VOWELHOSTS_FILE)) as f:
-            self.vowelhosts = self._parse_chardump(f.read())
+        fdata = get_data(
+            __package__, pjoin(ruledir, self.VOWELHOSTS_FILE)).decode()
+        self.vowelhosts = self._parse_chardump(fdata)
 
-        with open(pjoin(ruledir, self.PUNCTUATIONS_FILE)) as f:
-            self.punctuations = self._parse_chardump(f.read())
+        fdata = get_data(
+            __package__, pjoin(ruledir, self.PUNCTUATIONS_FILE)).decode()
+        self.punctuations = self._parse_chardump(fdata)
 
-        with open(pjoin(ruledir, self.CONJUNCTIONS_FILE)) as f:
-            for k in self._parse_conjunctions(f.read()):
-                self.conjtree.set_value_for_path(list(k), True)
+        fdata = get_data(
+            __package__, pjoin(ruledir, self.CONJUNCTIONS_FILE)).decode()
+        for k in self._parse_conjunctions(fdata):
+            self.conjtree.set_value_for_path(list(k), True)
 
-        with open(pjoin(ruledir, self.CONJUNCTION_GLUE_FILE)) as f:
-            self.conjglue = self._parse_char(f.read())
+        fdata = get_data(
+            __package__, pjoin(ruledir, self.CONJUNCTION_GLUE_FILE)).decode()
+        self.conjglue = self._parse_char(fdata)
 
-        with open(pjoin(ruledir, self.SPECIAL_RULES_FILE)) as f:
-            self.special_rules = self._parse_special_rules(f.read())
+        fdata = get_data(
+            __package__, pjoin(ruledir, self.SPECIAL_RULES_FILE)).decode()
+        self.special_rules = self._parse_special_rules(fdata)
 
         logging.debug(
             "Parsed rules from '{}':\n\t".format(ruledir) +
@@ -216,4 +225,4 @@ class Rule:
 if __name__ == '__main__':
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
-    rule = Rule('avro_rule')
+    rule = Rule('avro')

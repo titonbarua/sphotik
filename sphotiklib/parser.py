@@ -1,9 +1,9 @@
 
-from ruleparser import Rule
-from conjunctor import Conjunctor
-from vowelshaper import Vowelshaper
-from utils import SrcBead, DstBead, Cord
-from transliterator import Transliterator
+from .ruleparser import Rule
+from .conjunctor import Conjunctor
+from .vowelshaper import Vowelshaper
+from .utils import SrcBead, DstBead, Cord
+from .transliterator import Transliterator
 
 
 class Parser:
@@ -93,7 +93,7 @@ class Parser:
 
 
 if __name__ == "__main__":
-    rule = Rule('avro_rule')
+    rule = Rule('avro')
     parser = Parser(rule)
 
     parser.insert('a')

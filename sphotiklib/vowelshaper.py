@@ -1,6 +1,6 @@
 
 # vim: tabstop=4 expandtab shiftwidth=4
-from utils import SrcBead, DstBead, Cord
+from .utils import SrcBead, DstBead, Cord
 
 
 class Vowelshaper:

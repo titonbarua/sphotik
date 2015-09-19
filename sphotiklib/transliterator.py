@@ -2,9 +2,9 @@ import operator
 import unittest
 from copy import deepcopy
 from functools import reduce
-from utils import SrcBead, DstBead, Cord
 
-from tree import TreeNode
+from .tree import TreeNode
+from .utils import SrcBead, DstBead, Cord
 
 
 class Transliterator:
