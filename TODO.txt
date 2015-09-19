@@ -1,37 +1,3 @@
 TODO
 ====
-* Before we can make the ibus boiler plate running,
-  we need to package the current code. Otherwise,
-  my sanity will be eclipsed.
-
-    - Write a setup.py file.
-
-    - Oraganize the adhoc tests.
-
-    - Write a Readme file.
-
-* Make the ibus-boiler plate up and running.
-
-* Write the main transliteration pipeline.
-  Decisions to make:
-     - Do we need character pinning?
-
-       We invented character pinning for all those
-       planned stupid features like reverse transliterations
-       and raw-cursors. Other than that, character pinning
-       is useless. So, No; we don't need character pinning.
-
-     - Do we need character suggestions?
-
-       No. We don't need character suggestion system. This
-       was a messed up feature that delayed all the previous
-       releases.
-
-
-* Implement the special rule system.
-
-* Implement proper history system. Please don't do all the security
-  shenanigans like previous iterations.
-
-* Implement autocorrection ( magic word transliterations ). Aren't
-  autocorrections and history basically same thing?
+* Implement the `special rule` system.
