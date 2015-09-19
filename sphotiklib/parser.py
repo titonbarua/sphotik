@@ -1,4 +1,6 @@
 
+import unittest
+
 from .ruleparser import Rule
 from .conjunctor import Conjunctor
 from .vowelshaper import Vowelshaper
@@ -39,7 +41,7 @@ class Parser:
 
     def _insert_at_middle(self, text):
         newcord = self.transliterator(text)
-        self.cord = newcord
+        self.cord = self.cord[:self.cursor] + newcord + self.cord[self.cursor:]
         self.cursor += len(newcord)
 
     def insert(self, text):
@@ -92,27 +94,69 @@ class Parser:
             return bead
 
 
-if __name__ == "__main__":
-    rule = Rule('avro')
-    parser = Parser(rule)
+class _TestParser(unittest.TestCase):
 
-    parser.insert('a')
-    parser.insert('a')
-    parser.insert('mar sonar bangla')
-    print(parser.cord)
+    def setUp(self):
+        self.rule = Rule('avro')
 
-    parser.cursor += -3
-    parser.delete(-100)
-    print(parser.cord)
+    def test_simple(self):
+        parser = Parser(self.rule)
+        parser.insert('amar sOnar bangla')
+        # Automatic test assertions are useless in this case IMO.
+        # I am not gonna bother with them.
+        print("'amar sOnar bagnla' -> '{}'".format(parser.text))
 
-    parser.delete(100)
-    print(parser.cord)
+    def test_simple_onebyone(self):
+        parser = Parser(self.rule)
+        for c in 'amar sOnar bangla':
+            parser.insert(c)
+        print("(one-by-one) 'amar sOnar bagnla' -> '{}'".format(parser.text))
 
-    parser.insert('a`mi` tOmay valobashi')
-    print(parser.cord)
-    print(parser.text)
+    def test_front_deletion(self):
+        parser = Parser(self.rule)
+        parser.insert('amar sOnar bangla')
+        parser.cursor = 5
+        parser.delete(6)
+        print("(delete front) Removed 'sOnar ' -> '{}'".format(parser.text))
 
-    parser.insert(' kosTe achi skondho')
-    parser.insert(' sondhZa kingkortobZbimUR obZy h`Oya am`ra')
-    print(parser.cord)
-    print(parser.text)
+    def test_back_deletion(self):
+        parser = Parser(self.rule)
+        parser.insert('amar sOnar bangla')
+        parser.cursor = 5
+        parser.delete(-100)
+        print("(delete back) Removed 'amar ' -> '{}'".format(parser.text))
+
+    def test_back_deletion_and_insertion(self):
+        parser = Parser(self.rule)
+        parser.insert('amar sOnar bangla')
+        parser.cursor = 5
+        parser.delete(-100)
+        parser.insert('tOmar ')
+        print(
+            "(delete back + insert)"
+            " Replace 'amar ' with 'tomar ' -> '{}'".format(parser.text))
+
+    def test_forced_diacritic(self):
+        parser = Parser(self.rule)
+        parser.insert('a`mar')
+        print("(with forced diacritic) 'a`mar' -> '{}'".format(parser.text))
+
+    def test_conjunctions(self):
+        parser = Parser(self.rule)
+        parser.insert('kukkuT sondhZa kingkortobZbimURh')
+        print("conjunction formation -> '{}'".format(parser.text))
+
+    def test_conjunction_bypass(self):
+        parser = Parser(self.rule)
+        parser.insert('am`ra')
+        print("(conjunction bypass) 'am`ra' -> '{}'".format(parser.text))
+
+    def test_vowelshaping_bypass(self):
+        parser = Parser(self.rule)
+        parser.insert('h`Oya')
+        print("(vowelshaping bypass) 'h`Oya' -> '{}'".format(parser.text))
+
+    def test_forced_jo_fola(self):
+        parser = Parser(self.rule)
+        parser.insert('obZy')
+        print("(forced jo-fola) 'obZy' -> '{}'".format(parser.text))
