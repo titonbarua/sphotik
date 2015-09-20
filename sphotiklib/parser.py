@@ -62,6 +62,10 @@ class Parser:
 
         self._adjust_flags()
 
+    def clear(self):
+        self.cord = Cord()
+        self.cursor = 0
+
     @property
     def text(self):
         output = ""
