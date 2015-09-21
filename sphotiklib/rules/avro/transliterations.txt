@@ -78,6 +78,10 @@ ng # \u0982
 # Daari.
 . # \u0964
 .. # .
+... # ...
+
+# Hasanta.
+,, # \u09CD
 
 # Some alternate transliterations.
 x # ক স
