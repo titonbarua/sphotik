@@ -18,9 +18,8 @@ class Parser:
         self.cord = cord
         self.cursor = len(cord)
 
-    def _adjust_flags(self):
-        self.cord = self.vowelshaper(self.cord)
-        self.cord = self.conjunctor(self.cord)
+    def _adjust_flags(self, cord):
+        return self.conjunctor(self.vowelshaper(cord))
 
     def _insert_at_rightmost(self, text):
         lps = self.transliterator.longest_path_size
@@ -50,7 +49,7 @@ class Parser:
         else:
             self._insert_at_middle(text)
 
-        self._adjust_flags()
+        self.cord = self._adjust_flags(self.cord)
 
     def delete(self, steps):
         from_ = self.cursor
@@ -60,7 +59,7 @@ class Parser:
         if steps < 0:
             self.cursor = max(0, self.cursor + steps)
 
-        self._adjust_flags()
+        self.cord = self._adjust_flags(self.cord)
 
     def clear(self):
         self.cord = Cord()
@@ -68,8 +67,11 @@ class Parser:
 
     @property
     def text(self):
+        return self._render_text(self.cord)
+
+    def _render_text(self, cord):
         output = ""
-        for bead in self.cord:
+        for bead in cord:
             # Change vowels to diacritic form when flagged.
             if (('DIACRITIC' in bead.flags) or
                     ('FORCED_DIACRITIC' in bead.flags)):
