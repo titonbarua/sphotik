@@ -65,6 +65,9 @@ class Parser:
         self.cord = Cord()
         self.cursor = 0
 
+    def move_cursor_to_rightmost(self):
+        self.cursor = len(self.cord)
+
     @property
     def text(self):
         return self._render_text(self.cord)
