@@ -24,5 +24,8 @@ class Vowelshaper:
             if cord[max(0, pos - 1)].v in self.vowelhosts:
                 bead.add_flags('DIACRITIC')
                 continue
+            else:
+                bead.remove_flags('DIACRITIC')
+                continue
 
         return cord
