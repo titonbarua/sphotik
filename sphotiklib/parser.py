@@ -10,7 +10,7 @@ from .transliterator import Transliterator
 
 class Parser:
 
-    def __init__(self, rule, cord=Cord()):
+    def __init__(self, rule, cord=Cord(), insertion_sequence=0):
         self.rule = rule
         self.transliterator = Transliterator(rule.transtree)
         self.vowelshaper = Vowelshaper(rule.vowels, rule.vowelhosts)
@@ -18,37 +18,72 @@ class Parser:
         self.cord = cord
         self.cursor = len(cord)
 
+        # Insertion sequence is a necessary ugliness. It is an
+        # integer that is incremented everytime an insertion is made.
+        # Also, an inserted bead has this number attached to it, so
+        # that beads inserted in sequence can be related with one another.
+        # 
+        # This is important for inserting new characters in the middle, as
+        # without it, we have will either have to revert unrelated characters
+        # inserted in a different context or sacrifice multi-character
+        # transliterations.
+        self.insseq = insertion_sequence
+
     def _adjust_flags(self, cord):
         return self.conjunctor(self.vowelshaper(cord))
 
-    def _insert_at_rightmost(self, text):
+    def _insert(self, text):
         lps = self.transliterator.longest_path_size
 
+        # If the cursor is positioned at the middle of the cord,
+        # reverting texts right to the cursor makes no sense.
+        revertible, preserved_right = (
+            self.cord[:self.cursor], self.cord[self.cursor:])
+
         reverted = ""
+        backstep = 1
+        # We will keep reverting characters from back until we have
+        # roman chars enough to cover the longest possible transliteration
+        # path. This is like an worst case scenerio management.
         while len(reverted) < lps:
             try:
-                lastdst = self.cord[-1]
-                lastsrc = lastdst.source
-                reverted = lastsrc.v + reverted
-                self.cord = self.cord[
-                    :max(0, len(self.cord) - len(lastsrc.destinations))]
+                # Collect the rightmost bead.
+                bead = revertible[-1]
+
+                # Check if the collected bead is relevant (in sequence).
+                # Otherwise, reverting them is pointless.
+                if self.insseq - bead.insseq != backstep:
+                    break
+
+                # Collect the reverted source text.
+                reverted = bead.source.v + reverted
+
+                # Adjust the revertible cord.
+                n_reverted_cords = len(bead.source.destinations)
+                revertible = revertible[
+                    :max(0, len(revertible) - n_reverted_cords)]
+
+                backstep += n_reverted_cords
+
             except IndexError:
                 break
 
-        self.cord = self.cord + self.transliterator(reverted + text)
-        self.cursor = len(self.cord)
+        # Whatever is 'left' in the revertible stays unchanged.
+        preserved_left = revertible
 
-    def _insert_at_middle(self, text):
-        newcord = self.transliterator(text)
-        self.cord = self.cord[:self.cursor] + newcord + self.cord[self.cursor:]
-        self.cursor += len(newcord)
+        # Perform the transliteration.
+        reforged = self.transliterator(reverted + text)
+
+        # Attach insertion sequence to the reforged beads.
+        for bead in reforged:
+            bead.insseq = self.insseq
+            self.insseq += 1
+
+        self.cord = preserved_left + reforged + preserved_right
+        self.cursor = len(preserved_left) + len(reforged)
 
     def insert(self, text):
-        if self.cursor >= len(self.cord):
-            self._insert_at_rightmost(text)
-        else:
-            self._insert_at_middle(text)
-
+        self._insert(text)
         self.cord = self._adjust_flags(self.cord)
 
     def delete(self, steps):
@@ -169,3 +204,19 @@ class _TestParser(unittest.TestCase):
         parser = Parser(self.rule)
         parser.insert('obZy')
         print("(forced jo-fola) 'obZy' -> '{}'".format(parser.text))
+
+    def test_insertion_at_middle(self):
+        parser = Parser(self.rule)
+        parser.insert('polu')
+        org_text = parser.text
+
+        parser.cursor = 1
+        parser.insert('h')
+
+        # The result should be 'পহলু', not 'ফলু'.
+        # This is the expected behavior, since the 'p' was inserted
+        # at a different context than the 'h', 'ph' being interpreted
+        # as part of same transliteration is wrong.
+        print(
+            "Test of insertion at middle: '{}' -> '{}"
+            .format(org_text, parser.text))

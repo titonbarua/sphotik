@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='sphotiklib',
-    version='1.0',
+    version='1.1',
     description='Avro-like Bangla phonetic parser',
     long_description=(
         'A phonetic parser that parses Bangla text written in Roman'
