@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+# This file shows usage of the Parser class in sphotiklib package.
+import sys
+import os.path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
 from sphotiklib.parser import Parser
 from sphotiklib.ruleparser import Rule
 

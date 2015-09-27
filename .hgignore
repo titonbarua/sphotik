@@ -1,0 +1,4 @@
+uninstaller.sh
+sphotiklib/__pycache__/
+sphotik/__pycache__/
+

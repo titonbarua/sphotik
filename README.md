@@ -1,8 +1,3 @@
-# Sphotiklib: Avro-like Bangla phonetic parser in Python
+# Sphotik, an IBus engine for phonetic Bangla typing in Linux
 
-This is the core library used by 'Sphotik', an IBus input method engine
-for Linux, ( yet to be ) written in Python.
-
-# Usage
-
-The usage is best explained with some code. Please look at the `example.py`.
+Sphotik is a phonetic Bangla parser, in spirit of the famous Avro keyboard.
