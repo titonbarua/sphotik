@@ -11,18 +11,24 @@ OI # ঐ
 w W O # ও
 OU # ঔ
 
+
+# These are commented out because I am not quite sure about
+# their usefulness. Rather, they cause accidental diacritic
+# marks due to habit of using MOD key to disjoin conjunctions.
+#
 # Forced diacritic form of vowels.
-o[MOD] # অ                                   # FORCED_DIACRITIC
-A[MOD] a[MOD] # আ                            # FORCED_DIACRITIC
-i[MOD] # ই                                   # FORCED_DIACRITIC
-ee[MOD] Ee[MOD] eE[MOD] EE[MOD] I[MOD] # ঈ   # FORCED_DIACRITIC
-oo[MOD] u[MOD] # উ                           # FORCED_DIACRITIC
-U[MOD] # ঊ                                   # FORCED_DIACRITIC
-rri[MOD] # ঋ                                 # FORCED_DIACRITIC
-e[MOD] E[MOD] # এ                            # FORCED_DIACRITIC
-OI[MOD] # ঐ                                  # FORCED_DIACRITIC
-w[MOD] W[MOD] O[MOD] # ও                     # FORCED_DIACRITIC
-OU[MOD] # ঔ                                  # FORCED_DIACRITIC
+#o[MOD] # অ                                   # FORCED_DIACRITIC
+#A[MOD] a[MOD] # আ                            # FORCED_DIACRITIC
+#i[MOD] # ই                                   # FORCED_DIACRITIC
+#ee[MOD] Ee[MOD] eE[MOD] EE[MOD] I[MOD] # ঈ   # FORCED_DIACRITIC
+#oo[MOD] u[MOD] # উ                           # FORCED_DIACRITIC
+#U[MOD] # ঊ                                   # FORCED_DIACRITIC
+#rri[MOD] # ঋ                                 # FORCED_DIACRITIC
+#e[MOD] E[MOD] # এ                            # FORCED_DIACRITIC
+#OI[MOD] # ঐ                                  # FORCED_DIACRITIC
+#w[MOD] W[MOD] O[MOD] # ও                     # FORCED_DIACRITIC
+#OU[MOD] # ঔ                                  # FORCED_DIACRITIC
+
 
 # Consonants.
 k K # ক
