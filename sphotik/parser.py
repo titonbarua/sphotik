@@ -55,16 +55,16 @@ class ParserIbus(Parser):
 
     @property
     def preedit_text(self):
-        return self._render_preddit_text(self.cord)
+        return self._render_preddit_text(
+            self.cord, self.cursor if self.preedit_cursor_enabled else None)
 
-    def _render_preddit_text(self, cord):
+    def _render_preddit_text(self, cord, cursor):
         output = ""
         alt_cursor_used = False
         rendered_cursor_pos = None
 
         for i, bead in enumerate(cord):
-            show_cursor = (
-                self.preedit_cursor_enabled and (i == self.cursor))
+            show_cursor = (i == cursor)
 
             if (('DIACRITIC' in bead.flags) or
                     ('FORCED_DIACRITICT' in bead.flags)):
@@ -119,3 +119,18 @@ class ParserIbus(Parser):
                     rendered_cursor_pos + 1)
 
         return t
+
+    @property
+    def auxiliary_text(self):
+        return self._render_auxiliary_text(self.cord)
+
+    def _render_auxiliary_text(self, cord):
+        srcbeads = []
+        for i, bead in enumerate(cord):
+            if not i == 0:
+                if bead.source is srcbeads[-1]:
+                    continue
+            srcbeads.append(bead.source)
+
+        return IBus.Text.new_from_string(
+            "".join([sb.v for sb in srcbeads]))

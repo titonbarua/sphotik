@@ -2,7 +2,7 @@
 
 ## High priority:
 
-- Render and show auxiliary text. Implement Page Up/Page Down behavior.
+- Implement Page Up/Page Down behavior.
 
 - Implement raw roman string as suggestion.
   ( For writing bi-lingual texts ).

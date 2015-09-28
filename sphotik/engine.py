@@ -102,12 +102,15 @@ class EngineSphotik(IBus.Engine):
         self._parser = ParserIbus(Rule('avro'))
 
     def _update(self):
-        text = self._parser.preedit_text
+        petext = self._parser.preedit_text
         self.update_preedit_text_with_mode(
-            text,
-            text.get_length(),
+            petext,
+            petext.get_length(),
             True,
             IBus.PreeditFocusMode.CLEAR)
+
+        self.update_auxiliary_text(
+            self._parser.auxiliary_text, len(self._parser.cord) > 0)
 
     def _commit(self):
         self.commit_text(self._parser.text)
@@ -116,13 +119,13 @@ class EngineSphotik(IBus.Engine):
 
     def _insert_and_commit(self, text):
         self._parser.insert(text)
-        cursor = self._parser.cursor
+        cursor=self._parser.cursor
 
-        to_commit = self._parser.cord[:cursor]
+        to_commit=self._parser.cord[:cursor]
         self.commit_text(self._parser._render_text(to_commit))
 
-        to_retain = self._parser.cord[cursor:]
-        self._parser = ParserIbus(self._parser.rule, to_retain, 0)
+        to_retain=self._parser.cord[cursor:]
+        self._parser=ParserIbus(self._parser.rule, to_retain, 0)
 
         self._idle_update()
 
@@ -189,7 +192,7 @@ class EngineSphotik(IBus.Engine):
 
             if self._parser.cursor == 0:
                 # Commit the current text and update immediately.
-                text = self._parser.text
+                text=self._parser.text
                 self.commit_text(text)
                 self._parser.clear()
                 self._update()
@@ -220,7 +223,7 @@ class EngineSphotik(IBus.Engine):
             return False
 
         else:
-            keystr = IBus.keyval_to_unicode(keyval)
+            keystr=IBus.keyval_to_unicode(keyval)
             self._parser.insert(keystr)
 
             if len(self._parser.cord) >= self.max_word_length:
@@ -232,7 +235,7 @@ class EngineSphotik(IBus.Engine):
 
 
 def render_component_template(version, run_path, setup_path, icon_path):
-    component_xml = (
+    component_xml=(
         get_data(__package__, COMPONENT_TEMPLATE)
         .decode()
         .format(
@@ -247,15 +250,15 @@ def render_component_template(version, run_path, setup_path, icon_path):
 
 
 def main():
-    mainloop = GLib.MainLoop()
-    bus = IBus.Bus()
+    mainloop=GLib.MainLoop()
+    bus=IBus.Bus()
 
     def quit(*args, **kwargs):
         mainloop.quit()
 
     bus.connect("disconnected", quit)
 
-    factory = IBus.Factory.new(bus.get_connection())
+    factory=IBus.Factory.new(bus.get_connection())
     factory.add_engine(ENGINE_NAME, EngineSphotik)
 
     if len(sys.argv) > 1 and sys.argv[1] == '--ibus':
@@ -265,12 +268,12 @@ def main():
         # file and then saving it's content to a temporary file, then pass
         # the filename to generate a new ibus component!
         #-------------------------------------------------------------------\
-        version_file = os.path.join(
+        version_file=os.path.join(
             os.path.dirname(__file__), "..", "VERSION.txt")
         with open(version_file) as f:
-            version = f.read().strip()
+            version=f.read().strip()
 
-        component_data = render_component_template(
+        component_data=render_component_template(
             version, '{} --ibus'.format(os.path.realpath(sys.argv[0])), '', '')
 
         with NamedTemporaryFile() as f:
