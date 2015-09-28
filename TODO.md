@@ -2,8 +2,6 @@
 
 ## High priority:
 
-- Fix cursor Up/Down behavior.
-
 - Add digit transliteration.
 
 - Add limit for maximum length of a transliteration.

@@ -58,6 +58,8 @@ INTERESTING_KEYS = set([getattr(IBus, c) for c in (
 
         "Left",
         "Right",
+        "Up",
+        "Down",
     ]
     + list(string.digits)
     + list(string.ascii_letters)
@@ -127,7 +129,16 @@ class EngineSphotik(IBus.Engine):
         GLib.idle_add(self._update)
 
     def do_enable(self):
-        pass
+        self._parser.clear()
+
+    def do_disable(self):
+        self._parser.clear()
+
+    def do_focus_in(self):
+        self._parser.clear()
+
+    def do_focus_out(self):
+        self._parser.clear()
 
     def do_process_key_event(self, keyval, keycode, state):
         if keyval not in INTERESTING_KEYS:
@@ -203,6 +214,10 @@ class EngineSphotik(IBus.Engine):
             self._parser.normcursor += 1
             self._idle_update()
             return True
+
+        elif keyval in (IBus.Up, IBus.Down):
+            self._commit()
+            return False
 
         else:
             keystr = IBus.keyval_to_unicode(keyval)
