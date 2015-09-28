@@ -9,12 +9,10 @@ class ParserIbus(Parser):
     preedit_cursor_enabled = True
 
     chars_to_skip_while_moving = set(["\u09CD"])
-    chars_to_commit_if_detected = set([" ", "\n"])
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.chars_to_skip_while_moving.add(self.rule.modifier)
-        self.chars_to_commit_if_detected.update(self.rule.punctuations)
 
     @property
     def normcursor(self):
