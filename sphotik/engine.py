@@ -115,10 +115,9 @@ class EngineSphotik(IBus.Engine):
     def _commit(self):
         self.commit_text(self._parser.text)
         self._parser.clear()
-        self._idle_update()
+        self._update()
 
-    def _insert_and_commit(self, text):
-        self._parser.insert(text)
+    def _commit_upto_cursor(self):
         cursor=self._parser.cursor
 
         to_commit=self._parser.cord[:cursor]
@@ -127,7 +126,7 @@ class EngineSphotik(IBus.Engine):
         to_retain=self._parser.cord[cursor:]
         self._parser=ParserIbus(self._parser.rule, to_retain, 0)
 
-        self._idle_update()
+        self._update()
 
     def _idle_update(self):
         GLib.idle_add(self._update)
@@ -155,19 +154,15 @@ class EngineSphotik(IBus.Engine):
             self._commit()
             return False
 
-        if keyval == IBus.space:
-            self._insert_and_commit(' ')
-            return True
+        if keyval in (IBus.space, IBus.Return):
+            self._commit_upto_cursor()
+            return False
 
         elif keyval == IBus.Tab:
             if len(self._parser.cord) == 0:
                 return False
 
             self._commit()
-            return True
-
-        elif keyval == IBus.Return:
-            self._insert_and_commit('\n')
             return True
 
         elif keyval == IBus.BackSpace:

@@ -33,3 +33,6 @@
 ## Very low priority:
 
 - Add a setup program.
+
+- When `_commit_at_cursor` is called, vowelforms
+  of the uncommited text are not adjusted sometimes.
