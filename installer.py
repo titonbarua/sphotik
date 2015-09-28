@@ -68,6 +68,7 @@ except Exception as e:
 # Comfort the user, for she has jumped through such long hoops
 # with hopes of using this program! :V
 print("Installation successful!")
+print("** DO NOT REMOVE THIS DIRECTORY: {} **".format(source_dir))
 
 # Write uninstaller file.
 #-------------------------------------------------------------------\
