@@ -2,8 +2,6 @@
 
 ## High priority:
 
-- Add limit for maximum length of a transliteration.
-
 - Render and show auxiliary text. Implement Page Up/Page Down behavior.
 
 - Implement raw roman string as suggestion.

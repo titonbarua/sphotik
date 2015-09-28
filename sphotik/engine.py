@@ -94,6 +94,7 @@ def count_graphemes(text):
 
 
 class EngineSphotik(IBus.Engine):
+    max_word_length = 40
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -155,7 +156,7 @@ class EngineSphotik(IBus.Engine):
             self._insert_and_commit(' ')
             return True
 
-        if keyval == IBus.Tab:
+        elif keyval == IBus.Tab:
             if len(self._parser.cord) == 0:
                 return False
 
@@ -190,6 +191,7 @@ class EngineSphotik(IBus.Engine):
                 # Commit the current text and update immediately.
                 text = self._parser.text
                 self.commit_text(text)
+                self._parser.clear()
                 self._update()
 
                 # Since our cursor is placed at right side of the committed
@@ -199,8 +201,6 @@ class EngineSphotik(IBus.Engine):
                 for x in range(count_graphemes(text.get_text()) + 1):
                     self.forward_key_event(keyval, keycode, state)
 
-                self._parser.clear()
-                self._idle_update()
                 return True
 
             self._parser.normcursor += -1
@@ -222,9 +222,13 @@ class EngineSphotik(IBus.Engine):
         else:
             keystr = IBus.keyval_to_unicode(keyval)
             self._parser.insert(keystr)
-            self._idle_update()
 
-        return True
+            if len(self._parser.cord) >= self.max_word_length:
+                self._commit()
+            else:
+                self._idle_update()
+
+            return True
 
 
 def render_component_template(version, run_path, setup_path, icon_path):
