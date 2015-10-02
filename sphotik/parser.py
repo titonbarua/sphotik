@@ -50,15 +50,19 @@ class ParserIbus(Parser):
 
         self.cursor = min(len(self.cord), max(0, self.cursor))
 
-    def _render_text(self, cord):
+    @property
+    def itext(self):
+        return self._render_itext(self.cord)
+
+    def _render_itext(self, cord):
         return IBus.Text.new_from_string(super()._render_text(cord))
 
     @property
-    def preedit_text(self):
-        return self._render_preddit_text(
+    def preedit_itext(self):
+        return self._render_preddit_itext(
             self.cord, self.cursor if self.preedit_cursor_enabled else None)
 
-    def _render_preddit_text(self, cord, cursor):
+    def _render_preddit_itext(self, cord, cursor):
         output = ""
         alt_cursor_used = False
         rendered_cursor_pos = None
@@ -121,10 +125,10 @@ class ParserIbus(Parser):
         return t
 
     @property
-    def auxiliary_text(self):
-        return self._render_auxiliary_text(self.cord)
+    def auxiliary_itext(self):
+        return self._render_auxiliary_itext(self.cord)
 
-    def _render_auxiliary_text(self, cord):
+    def _render_auxiliary_itext(self, cord):
         srcbeads = []
         for i, bead in enumerate(cord):
             if not i == 0:

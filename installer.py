@@ -13,30 +13,68 @@ engine_command = "'{}' '{}' --ibus".format(python_path, engine_path)
 
 # Check for python version.
 if not sys.version_info >= (3, 4):
-    print(
-        "Python version 3.4 or higher is required to run sphotik."
-        "\nIn Ubuntu/Debian, install or upgrade python3 with this"
-        "\ncommand:\n\tapt-get install python3")
+    user_help = """
+Python version 3.4 or higher is required to run Sphotik. Install python3.4
+or higher using your distributions package management command:
+    [ Ubuntu/Debian ]
+        apt-get install python3
+"""
+    print(user_help.strip())
     sys.exit(1)
 
 # Check if ibus is installed ( in a silly way ).
 if not os.path.isdir(ibus_component_bank):
-    print(
-        "Either IBus is not installed, or installed to non-standard"
-        "\nlocation. If it is not installed, you can install with"
-        "\nthis command (in Ubuntu/Debian):"
-        "\n\tapt-get install ibus ibus-gtk ibus-gtk3 im-config")
+    user_help = """
+Either IBus is not installed, or installed in non-standard location.
+For the first case, install IBus using system package manager:
+    [ Ubuntu/Debian ]
+        apt-get install ibus ibus-gtk ibus-gtk3 im-config
+
+For the second case, edit the installer script and setup "ibus_component_bank"
+variable according to your IBus installation.
+"""
+    print(user_help.strip())
     sys.exit(2)
 
 # Let's try to import required gobject introspection repositories.
 try:
     from gi.repository import IBus, GLib
-except ImportError:
-    print(
-        "Required gobject introspection repositories are not found."
-        "\nIn Ubuntu/Debian, try to install them with this command:"
-        "\n\tapt-get install python3-gi gir1.2-glib-2.0 gir1.2-ibus-1.0")
+except (ImportError, AttributeError):
+    user_help = """
+Required "GObject Introspection" repositories are not found. Install them
+with system package manager:
+    [ Ubuntu/Debian ]
+        apt-get install python3-gi gir1.2-glib-2.0 gir1.2-ibus-1.0
+"""
+    print(user_help.strip())
     sys.exit(3)
+
+
+# Try to open a bangla dictionary with the help of enchant.
+try:
+    import enchant
+    from enchant.errors import DictNotFoundError
+
+    enchant_dicts_to_try = ['bn_BD', 'bn']
+    for dname in enchant_dicts_to_try:
+        try:
+            d = enchant.Dict('bn_BD')
+            break
+        except DictNotFoundError:
+            pass
+    else:
+        raise RuntimeError("Didn't find any expected dictionary.")
+
+except (ImportError, RuntimeError):
+    # Not suggesting aspell-bn, since I can't get it working.
+    user_help = """
+Required "Enchant" binding for python3 is not found. Install it with
+system package manager:
+    [ Ubuntu/Debian ]
+        apt-get install python3-enchant hunspell-bn
+"""
+    print(user_help.strip())
+    sys.exit(4)
 
 # Time for manual file installation ...
 #--------------------------------------------------------------------\
@@ -62,7 +100,7 @@ try:
     files_manually_installed.append(component_file)
 except Exception as e:
     print("Failed to install ibus component file: {}".format(e))
-    sys.exit(8)
+    sys.exit(5)
 #--------------------------------------------------------------------/
 
 # Comfort the user, for she has jumped through such long hoops

@@ -2,13 +2,6 @@
 
 ## High priority:
 
-- Implement Page Up/Page Down behavior.
-
-- Implement raw roman string as suggestion.
-  ( For writing bi-lingual texts ).
-
-- Integrate aspell-bn.
-
 - Implement history and autocorrection.
 
 - Fix delete() method to act like normcursor.
