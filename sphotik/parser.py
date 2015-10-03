@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from gi.repository import IBus
 
 from sphotiklib.parser import Parser
@@ -138,3 +140,42 @@ class ParserIbus(Parser):
 
         return IBus.Text.new_from_string(
             "".join([sb.v for sb in srcbeads]))
+
+    def suggest_flag_modifications(self):
+        """
+        Create some basic suggestions by modifying flags.
+
+        By suggesting last constructed conjunction to be disjoined and/or
+        last diacritic vowel to be distinct, we can account for almost all
+        of the annoyances of automatic vowelform and conjunction creation.
+        """
+        suggestions = []
+
+        # Find first (from right) consonant that is conjoined and
+        # suggest it to be disjoined.
+        candidate = self.cord[:]
+        for i, bead in reversed(list(enumerate(candidate))):
+            if 'CONJOINED' in bead.flags:
+                newbead = deepcopy(bead)
+                newbead.remove_flags('CONJOINED')
+
+                candidate = candidate[:i] + newbead + candidate[i + 1:]
+                suggestions.append(self._render_text(candidate))
+
+                break
+
+        # Find first (from right) vowel that is diacritic and
+        # suggest it to be distinct.
+        candidate = self.cord[:]
+        for i, bead in reversed(list(enumerate(candidate))):
+            if (('DIACRITIC' in bead.flags) or
+                    ('FORCED_DIACRITIC' in bead.flags)):
+                newbead = deepcopy(bead)
+                newbead.remove_flags('DIACRITIC', 'FORCED_DIACRITIC')
+
+                candidate = candidate[:i] + newbead + candidate[i + 1:]
+                suggestions.append(self._render_text(candidate))
+
+                break
+
+        return suggestions

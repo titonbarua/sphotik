@@ -188,6 +188,10 @@ class EngineSphotik(IBus.Engine):
                 # Add default text to suggestions.
                 ltm.add_entry("default", default_text)
 
+                # Add simple suggestions made by flag modifications.
+                for sug in self._parser.suggest_flag_modifications():
+                    ltm.add_entry("flagmod", sug)
+
                 # Add dictionary suggestions.
                 for sug in self._enchant_dict.suggest(default_text):
                     ltm.add_entry("dict", sug)

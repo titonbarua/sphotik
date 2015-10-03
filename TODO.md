@@ -6,6 +6,8 @@
 
 - Fix delete() method to act like normcursor.
 
+- aspell-bn support seems to be mandatory, since
+  hunspell-bn is only available in debian testing.
 
 ## Low priority:
 
