@@ -151,31 +151,34 @@ class ParserIbus(Parser):
         """
         suggestions = []
 
+        def suggest_without_flags(index, flags_to_remove):
+            newbead = deepcopy(self.cord[index])
+            newbead.remove_flags(*flags_to_remove)
+
+            newcord = self.cord[:index] + newbead + self.cord[index + 1:]
+            suggestions.append(self._render_text(newcord))
+
         # Find first (from right) consonant that is conjoined and
         # suggest it to be disjoined.
-        candidate = self.cord[:]
-        for i, bead in reversed(list(enumerate(candidate))):
+        for i, bead in reversed(list(enumerate(self.cord))):
             if 'CONJOINED' in bead.flags:
-                newbead = deepcopy(bead)
-                newbead.remove_flags('CONJOINED')
-
-                candidate = candidate[:i] + newbead + candidate[i + 1:]
-                suggestions.append(self._render_text(candidate))
-
+                suggest_without_flags(i, ('CONJOINED',))
                 break
 
         # Find first (from right) vowel that is diacritic and
         # suggest it to be distinct.
-        candidate = self.cord[:]
-        for i, bead in reversed(list(enumerate(candidate))):
+        for i, bead in reversed(list(enumerate(self.cord))):
             if (('DIACRITIC' in bead.flags) or
                     ('FORCED_DIACRITIC' in bead.flags)):
-                newbead = deepcopy(bead)
-                newbead.remove_flags('DIACRITIC', 'FORCED_DIACRITIC')
+                suggest_without_flags(i, ('DIACRITIC', 'FORCED_DIACRITIC'))
+                break
 
-                candidate = candidate[:i] + newbead + candidate[i + 1:]
-                suggestions.append(self._render_text(candidate))
-
+        # Find first (from left) vowel that is diacritic and
+        # suggest it to be distinct.
+        for i, bead in enumerate(self.cord):
+            if (('DIACRITIC' in bead.flags) or
+                    ('FORCED_DIACRITIC' in bead.flags)):
+                suggest_without_flags(i, ('DIACRITIC', 'FORCED_DIACRITIC'))
                 break
 
         return suggestions
