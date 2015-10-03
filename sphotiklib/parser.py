@@ -15,8 +15,8 @@ class Parser:
         self.transliterator = Transliterator(rule.transtree)
         self.vowelshaper = Vowelshaper(rule.vowels, rule.vowelhosts)
         self.conjunctor = Conjunctor(rule.conjtree)
-        self.cord = cord
-        self.cursor = len(cord)
+        self.cord = self._adjust_flags(cord)
+        self.cursor = len(self.cord)
 
         # Insertion sequence is a necessary ugliness. It is an
         # integer that is incremented everytime an insertion is made.
