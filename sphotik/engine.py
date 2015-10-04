@@ -15,6 +15,18 @@ from sphotiklib.parser import Parser
 from sphotiklib.ruleparser import Rule
 
 from .parser import ParserIbus
+from .history import HistoryManager
+
+
+RULESET_NAME = "avro"
+
+MAX_WORD_LENGTH = 40
+ENCHANT_DICT_NAMES = ['bn_BD', 'bn']
+HISTORY_FILE_PATH = "~/.sphotik_history.sqlite"
+
+LOOKUP_TABLE_PAGE_SIZE = 5
+LOOKUP_TABLE_ORIENTATION = 1  # 1 = vertical, 0 = horizontal
+LOOKUP_TABLE_IS_ROUND = False
 
 
 # Keys to look after. An example of uninteresting event is
@@ -129,6 +141,9 @@ class LookupTableManager:
 
         self.lt.append_candidate(ibus_text)
 
+    def entry_exists(self, text):
+        return text in self._entry_texts
+
     def get_entry(self, index):
         return self._entries[index]
 
@@ -152,14 +167,29 @@ class LookupTableManager:
 
 
 class EngineSphotik(IBus.Engine):
-    max_word_length = 40
-    enchant_dict_names = ['bn_BD', 'bn']
+    ruleset_name = RULESET_NAME
+
+    max_word_length = MAX_WORD_LENGTH
+    enchant_dict_names = ENCHANT_DICT_NAMES
+    history_file_path = os.path.expanduser(HISTORY_FILE_PATH)
+
+    lookup_table_page_size = LOOKUP_TABLE_PAGE_SIZE
+    lookup_table_orientation = LOOKUP_TABLE_ORIENTATION
+    lookup_table_is_round = LOOKUP_TABLE_IS_ROUND
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._parser = ParserIbus(Rule('avro'))
-        self._lookup_table_manager = LookupTableManager(5, 0, True, True)
+        self._parser = ParserIbus(Rule(self.ruleset_name))
+        self._history_manager = HistoryManager(self.history_file_path)
+        self._lookup_table_manager = LookupTableManager(
+            self.lookup_table_page_size,
+            0,  # Cursor index.
+            True,  # Cursor is visible.
+            self.lookup_table_is_round)
+
+        self._lookup_table_manager.lt.set_orientation(
+            self.lookup_table_orientation)
 
         # Try to create an enchant dictionary from
         # any of the specified names. If all failed, create
@@ -178,23 +208,51 @@ class EngineSphotik(IBus.Engine):
 
     def _update_lookup_table(self, remake=True):
         ltm = self._lookup_table_manager
+        default_text = self._parser.text
 
-        # If remake flag is false, we don't recreate the table.
-        if remake:
-            ltm.clear()
+        # If not instructed to remake, don't.
+        if not remake:
+            self.update_lookup_table_fast(ltm.lt, len(ltm) > 0)
+            return
 
-            default_text = self._parser.text
-            if len(default_text) > 0:
-                # Add default text to suggestions.
-                ltm.add_entry("default", default_text)
+        ltm.clear()  # Clear lookup table.
 
-                # Add simple suggestions made by flag modifications.
-                for sug in self._parser.suggest_flag_modifications():
-                    ltm.add_entry("flagmod", sug)
+        # No point in making a lookup table if we don't have
+        # enough of transliterated text.
+        if not len(default_text) > 0:
+            self.update_lookup_table_fast(ltm.lt, len(ltm) > 0)
+            return
 
-                # Add dictionary suggestions.
-                for sug in self._enchant_dict.suggest(default_text):
-                    ltm.add_entry("dict", sug)
+        # Add default text to suggestions.
+        ltm.add_entry("default", default_text)
+
+        # Add history candidates to suggestions.
+        for i, sug in enumerate(
+                self._history_manager.search(self._parser.input_text)):
+
+            # If we have the most probable history candidate
+            # but it does not exist in the lookup table while
+            # 'parser cursor' resides at it's natural rightmost position,
+            # then we adjust 'lookup table cursor' to hi-lite our current
+            # candidate.
+            if ((i == 0)
+                    and (not ltm.entry_exists(sug))
+                    and (self._parser.cursor >= len(self._parser.cord))):
+                # Add the candidate and make it be the preferred text
+                # to be selected upon a commit.
+                ltm.add_entry("history", sug)
+                ltm.lt.set_cursor_pos(
+                    max(0, ltm.lt.get_number_of_candidates() - 1))
+            else:
+                ltm.add_entry("history", sug)
+
+        # Add simple suggestions made by flag modifications.
+        for sug in self._parser.suggest_flag_modifications():
+            ltm.add_entry("flagmod", sug)
+
+        # Add dictionary suggestions.
+        for sug in self._enchant_dict.suggest(default_text):
+            ltm.add_entry("dict", sug)
 
         self.update_lookup_table_fast(ltm.lt, len(ltm) > 0)
 
@@ -233,29 +291,56 @@ class EngineSphotik(IBus.Engine):
         if not len(self._lookup_table_manager) > 0:
             return False
 
-        type_, text, itext = self._lookup_table_manager.get_entry_under_cursor(
-        )
+        type_, text, itext = (
+            self._lookup_table_manager.get_entry_under_cursor())
+
+        # We don't want to commit 'default' texts from this function.
         if type_ == 'default':
             return False
 
+        # Prepare history entry.
+        history_entry = (self._parser.input_text, itext.get_text())
+
+        # Do commit.
         self.commit_text(itext)
         self._parser.clear()
+
+        # Save history.
+        self._history_manager.save(*history_entry)
+
         return True
 
     def _commit(self):
         if not self._commit_from_lookup_table():
+            # Prepare history entry.
+            history_entry = (
+                self._parser.input_text, self._parser.text)
+
+            # Do commit.
             self.commit_text(self._parser.itext)
             self._parser.clear()
+
+            # Save history.
+            self._history_manager.save(*history_entry)
 
     def _commit_upto_cursor(self):
         if not self._commit_from_lookup_table():
             cursor = self._parser.cursor
 
             to_commit = self._parser.cord[:cursor]
-            self.commit_text(self._parser._render_itext(to_commit))
-
             to_retain = self._parser.cord[cursor:]
+
+            # Prepare history entry.
+            history_entry = (
+                self._parser._render_input_text(to_commit),
+                self._parser._render_text(to_commit))
+
+            # Do commit.
+            self.commit_text(self._parser._render_itext(to_commit))
             self._parser = ParserIbus(self._parser.rule, to_retain, 0)
+
+            # Save history.
+            self._history_manager.save(*history_entry)
 
     def _idle_update(self):
         """

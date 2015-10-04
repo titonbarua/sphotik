@@ -131,6 +131,13 @@ class ParserIbus(Parser):
         return self._render_auxiliary_itext(self.cord)
 
     def _render_auxiliary_itext(self, cord):
+        return IBus.Text.new_from_string(self._render_input_text(cord))
+
+    @property
+    def input_text(self):
+        return self._render_input_text(self.cord)
+
+    def _render_input_text(self, cord):
         srcbeads = []
         for i, bead in enumerate(cord):
             if not i == 0:
@@ -138,8 +145,7 @@ class ParserIbus(Parser):
                     continue
             srcbeads.append(bead.source)
 
-        return IBus.Text.new_from_string(
-            "".join([sb.v for sb in srcbeads]))
+        return "".join([sb.v for sb in srcbeads])
 
     def suggest_flag_modifications(self):
         """

@@ -2,29 +2,38 @@
 
 ## High priority:
 
-- Implement history and autocorrection.
+- Make the installer copy the source tree to "/opt/".
+
+- Make presence of a dictionary optional during installation.
 
 - Fix delete() method to act like normcursor.
 
-- aspell-bn support seems to be mandatory, since
-  hunspell-bn is only available in debian testing.
-
-## Low priority:
-
 - Add license headers.
 
-- Write documentation for users.
+- Write installation documentation for users.
+
+- Add acknoweledgement.
 
 - Make the release.
 
+- Add page-up/down key support.
+
+- Remove "a" from 'modified vowelshape suggestion from left'.
+
+
+## Low priority:
+
 - Implement the `special rule` system.
+
+- Add proper sanitization to history fetch operation.
+
+
+## Very low priority:
+
+- Add a configuration program.
 
 - Enable numeric keys.
 
 - Enable detection of password input context,
   so that passwords won't go to history.
 
-
-## Very low priority:
-
-- Add a setup program.
