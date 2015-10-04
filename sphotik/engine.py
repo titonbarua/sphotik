@@ -297,7 +297,7 @@ class EngineSphotik(IBus.Engine):
 
         # If parser-cursor is not residing at it's natural rightmost
         # position, table-cursor should sit on top of default text.
-        if self._parser.cursor >= len(self._parser.cord):
+        if not self._parser.cursor >= len(self._parser.cord):
             table.set_cursor_pos(0)
 
         self.update_lookup_table_fast(ltm.table, len(ltm) > 0)
