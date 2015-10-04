@@ -18,8 +18,6 @@
 
 - Add page-up/down key support.
 
-- Remove "a" from 'modified vowelshape suggestion from left'.
-
 
 ## Low priority:
 

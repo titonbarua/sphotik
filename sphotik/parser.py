@@ -171,9 +171,20 @@ class ParserIbus(Parser):
                 suggest_without_flags(i, ('CONJOINED',))
                 break
 
+        # Shape of these vowels are usually ambiguous except at the
+        # start of a word.
+        vowels_to_modify = (
+            "\N{BENGALI LETTER I}",
+            "\N{BENGALI LETTER II}",
+            "\N{BENGALI LETTER U}",
+            "\N{BENGALI LETTER UU}",)
+
         # Find first (from right) vowel that is diacritic and
         # suggest it to be distinct.
         for i, bead in reversed(list(enumerate(self.cord))):
+            if bead.v not in vowels_to_modify:
+                continue
+
             if (('DIACRITIC' in bead.flags) or
                     ('FORCED_DIACRITIC' in bead.flags)):
                 suggest_without_flags(i, ('DIACRITIC', 'FORCED_DIACRITIC'))
@@ -182,6 +193,9 @@ class ParserIbus(Parser):
         # Find first (from left) vowel that is diacritic and
         # suggest it to be distinct.
         for i, bead in enumerate(self.cord):
+            if bead.v not in vowels_to_modify:
+                continue
+
             if (('DIACRITIC' in bead.flags) or
                     ('FORCED_DIACRITIC' in bead.flags)):
                 suggest_without_flags(i, ('DIACRITIC', 'FORCED_DIACRITIC'))
