@@ -21,8 +21,6 @@
 
 - Implement the `special rule` system.
 
-- Add proper sanitization to history fetch operation.
-
 
 ## Very low priority:
 

@@ -20,19 +20,12 @@ class HistoryManager:
             self,
             histfilepath,
             input_generalizer=lambda x: x,
-            output_sanitizer=lambda x: x,
             session_history_size=1000,
             session_history_concern_size=20,):
         # An input generalizer is a function that may be used to
         # generalize the input data, so that history suggestions can be
         # laxed and fuzzy; trading their accuracy in return.
         self.input_generalizer = input_generalizer
-
-        # Output sanitizer is used to sanitize suggestion data.
-        # As history is read from a sqlite file, it it unreliable and maybe
-        # used with malicious intent. But defining the sanitizer function
-        # remains a challenge. # TODO
-        self.output_sanitizer = output_sanitizer
 
         # Session history is an in-memory sequence of most recently used
         # words and their input texts. The most likely conversion of a word
@@ -62,8 +55,7 @@ class HistoryManager:
     """
 
     def search(self, roman_text):
-        return self.output_sanitizer(
-            self._search(self.input_generalizer(roman_text)))
+        return self._search(self.input_generalizer(roman_text))
 
     def _search(self, roman_text):
         # Fetch results from memory. The work flow of the following
@@ -77,39 +69,37 @@ class HistoryManager:
         #
         #   - Count the converted bangla texts and order them
         #     according to their relative frequency.
-        bangla_texts = [
-            text for text, count in Counter(
-                [
-                    bt for rt, bt
-                    in reversed(self.session_history)
-                    if rt == roman_text
-                ][:self.session_history_concern_size]
-            ).most_common()
-        ]
+        hist = Counter(
+            [
+                bt for rt, bt
+                in reversed(self.session_history)
+                if rt == roman_text
+            ][:self.session_history_concern_size]
+        )
 
-        if bangla_texts:
-            return bangla_texts
+        if hist:
+            return hist
 
         # Fetch results from disk, as we didn't find them in memory.
         #---------------------------------------------------------------\
         if self.conn is None:
-            return []
+            return Counter()
 
         try:
-            bangla_texts = []
+            hist = Counter()
 
             with self.conn:
                 result = self.conn.execute(
                     self.QUERY_SEARCH, {"roman_text": roman_text})
 
-                for bangla_text, _ in result:
-                    bangla_texts.append(bangla_text)
+                for bangla_text, freq in result:
+                    hist[bangla_text] = freq
 
-            return bangla_texts
+            return hist
 
         except sqlite3.Error as e:
             logging.exception("Could not read history from disk.")
-            return []
+            return Counter()
         #----------------------------------------------------------------/
 
     QUERY_SAVE_NEW = """

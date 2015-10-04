@@ -121,54 +121,105 @@ class _UselessEnchantDict:
 class LookupTableManager:
 
     def __init__(self, *args, **kwargs):
-        self.lt = IBus.LookupTable(*args, **kwargs)
+        self._table = IBus.LookupTable(*args, **kwargs)
         self.clear()
 
     def clear(self):
-        self.lt.clear()
+        self._table.clear()
+        self._finalized = False
 
-        # Every entry is a tuple of 3 elements: (type, text, ibus_text)
+        # Place to dump entries. Every entry is a tuple of
+        # four elements: (type, freq, text, ibus_text)
         self._entries = []
 
-        # This set holds all the texts ( 2nd elem ) from self._entries.
-        # This is to enture that all entries are unique.
-        self._entry_texts = set()
+        # Place to hold the entries at exact order matching
+        # the underlaying lookup table.
+        self._finalized_entries = []
 
-    def add_entry(self, type_, text, ibus_text=None):
-        if text in self._entry_texts:
-            return
+        # Collection of all the texts ( 3rd element ) from
+        # finalized entries.
+        self._finalized_entry_texts = set()
 
+    def add_entry(self, type_, freq, text, ibus_text=None):
         if ibus_text is None:
             ibus_text = IBus.Text.new_from_string(text)
 
-        self._entries.append((type_, text, ibus_text))
-        self._entry_texts.add(text)
+        self._entries.append((type_, freq, text, ibus_text))
+        self._finalized = False
 
-        self.lt.append_candidate(ibus_text)
+    @property
+    def table(self):
+        if self._finalized:
+            return self._table
+
+        # Select all entries of type 'default'. They go to top
+        # of the list, internally sorted by their freq.
+        default_entries = list(sorted(
+            [e for e in self._entries if e[0] == 'default'],
+            key=lambda x: x[1],
+            reverse=True))
+
+        # Select all entries except 'default'. They are also
+        # sorted according to their freq.
+        other_entries = list(sorted(
+            [e for e in self._entries if e[0] != 'default'],
+            key=lambda x: x[1],
+            reverse=True))
+
+        # Sort entries by their frequency of appearence,
+        # but always keep entries of type 'default' at top.
+        sorted_entries = list(sorted(
+            self._entries,
+            key=lambda e: ((e[0] == 'default'), e[1]),
+            reverse=True))
+
+        # Finalize entries with unique 'text'.
+        for i, e in enumerate(sorted_entries):
+            type_, freq, text, ibus_text = e
+
+            if text in self._finalized_entry_texts:
+                continue
+
+            self._finalized_entries.append(e)
+            self._finalized_entry_texts.add(text)
+            self._table.append_candidate(ibus_text)
+
+        if self._entries:
+            # Set the cursor to text with highest frequency.
+            max_freq = max([e[1] for e in self._entries])
+            for i, (_, freq, _, _) in enumerate(self._finalized_entries):
+                # We are only concerned with the first candidate with
+                # maximum frequency.
+                if freq == max_freq:
+                    self._table.set_cursor_pos(i)
+                    break
+
+        self._finalized = True
+        return self._table
 
     def entry_exists(self, text):
-        return text in self._entry_texts
+        return text in self._finalized_entry_texts
 
     def get_entry(self, index):
-        return self._entries[index]
+        return self._finalized_entries[index]
 
     def get_entry_under_cursor(self):
-        return self.get_entry(self.lt.get_cursor_pos())
+        return self.get_entry(self._table.get_cursor_pos())
 
     def __len__(self):
-        return len(self._entries)
+        return len(self._finalized_entries)
 
     def cursor_up(self):
-        self.lt.cursor_up()
+        self.table.cursor_up()
 
     def cursor_down(self):
-        self.lt.cursor_down()
+        self.table.cursor_down()
 
     def page_up(self):
-        self.lt.page_up()
+        self.table.page_up()
 
     def page_down(self):
-        self.lt.page_down()
+        self.table.page_down()
 
 
 class EngineSphotik(IBus.Engine):
@@ -193,7 +244,7 @@ class EngineSphotik(IBus.Engine):
             True,  # Cursor is visible.
             self.lookup_table_is_round)
 
-        self._lookup_table_manager.lt.set_orientation(
+        self._lookup_table_manager.table.set_orientation(
             self.lookup_table_orientation)
 
         # Try to create an enchant dictionary from
@@ -217,7 +268,7 @@ class EngineSphotik(IBus.Engine):
 
         # If not instructed to remake, don't.
         if not remake:
-            self.update_lookup_table_fast(ltm.lt, len(ltm) > 0)
+            self.update_lookup_table_fast(ltm.table, len(ltm) > 0)
             return
 
         ltm.clear()  # Clear lookup table.
@@ -225,41 +276,31 @@ class EngineSphotik(IBus.Engine):
         # No point in making a lookup table if we don't have
         # enough of transliterated text.
         if not len(default_text) > 0:
-            self.update_lookup_table_fast(ltm.lt, len(ltm) > 0)
+            self.update_lookup_table_fast(ltm.table, len(ltm) > 0)
             return
 
+        hist = self._history_manager.search(self._parser.input_text)
+
         # Add default text to suggestions.
-        ltm.add_entry("default", default_text)
-
-        # Add history candidates to suggestions.
-        for i, sug in enumerate(
-                self._history_manager.search(self._parser.input_text)):
-
-            # If we have the most probable history candidate
-            # but it does not exist in the lookup table while
-            # 'parser cursor' resides at it's natural rightmost position,
-            # then we adjust 'lookup table cursor' to hi-lite our current
-            # candidate.
-            if ((i == 0)
-                    and (not ltm.entry_exists(sug))
-                    and (self._parser.cursor >= len(self._parser.cord))):
-                # Add the candidate and make it be the preferred text
-                # to be selected upon a commit.
-                ltm.add_entry("history", sug)
-                ltm.lt.set_cursor_pos(
-                    max(0, ltm.lt.get_number_of_candidates() - 1))
-            else:
-                ltm.add_entry("history", sug)
+        ltm.add_entry("default", hist[default_text], default_text)
 
         # Add simple suggestions made by flag modifications.
         for sug in self._parser.suggest_flag_modifications():
-            ltm.add_entry("flagmod", sug)
+            ltm.add_entry("flagmod", hist[sug], sug)
 
         # Add dictionary suggestions.
         for sug in self._enchant_dict.suggest(default_text):
-            ltm.add_entry("dict", sug)
+            ltm.add_entry("dict", hist[sug], sug)
 
-        self.update_lookup_table_fast(ltm.lt, len(ltm) > 0)
+        # Finalize the table.
+        table = ltm.table
+
+        # If parser-cursor is not residing at it's natural rightmost
+        # position, table-cursor should sit on top of default text.
+        if self._parser.cursor >= len(self._parser.cord):
+            table.set_cursor_pos(0)
+
+        self.update_lookup_table_fast(ltm.table, len(ltm) > 0)
 
     def _update(self, remake_lookup_table=True):
         self._update_lookup_table(remake_lookup_table)
@@ -270,7 +311,7 @@ class EngineSphotik(IBus.Engine):
         # show currently selected candidate as preedit text.
         #-------------------------------------------------------------------\
         try:
-            type_, text, itext = (
+            type_, freq, text, itext = (
                 self._lookup_table_manager.get_entry_under_cursor())
 
             if type_ == "default":
@@ -296,7 +337,7 @@ class EngineSphotik(IBus.Engine):
         if not len(self._lookup_table_manager) > 0:
             return False
 
-        type_, text, itext = (
+        type_, freq, text, itext = (
             self._lookup_table_manager.get_entry_under_cursor())
 
         # We don't want to commit 'default' texts from this function.
@@ -491,8 +532,9 @@ class EngineSphotik(IBus.Engine):
 
             # Put lookup table cursor to default position
             # if it is not already.
-            if self._lookup_table_manager.lt.get_cursor_pos() > 0:
-                self._lookup_table_manager.lt.set_cursor_pos(0)
+            table = self._lookup_table_manager.table
+            if table.get_cursor_pos() > 0:
+                table.set_cursor_pos(0)
                 self._update(remake_lookup_table=False)
                 return True
 
