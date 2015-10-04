@@ -8,8 +8,6 @@
 
 - Fix delete() method to act like normcursor.
 
-- Add license headers.
-
 - Write installation documentation for users.
 
 - Add acknoweledgement.
