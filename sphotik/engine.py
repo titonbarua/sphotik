@@ -34,6 +34,8 @@ LOOKUP_TABLE_IS_ROUND = False
 # CTRL + some other key press event ).
 INTERESTING_KEYS = set([getattr(IBus, c) for c in (
     [
+        "Escape",
+
         "space",
         "Return",
         "BackSpace",
@@ -481,6 +483,22 @@ class EngineSphotik(IBus.Engine):
 
             self._lookup_table_manager.page_down()
             self._update(remake_lookup_table=False)
+            return True
+
+        elif keyval == IBus.Escape:
+            if not len(self._lookup_table_manager) > 0:
+                return False
+
+            # Put lookup table cursor to default position
+            # if it is not already.
+            if self._lookup_table_manager.lt.get_cursor_pos() > 0:
+                self._lookup_table_manager.lt.set_cursor_pos(0)
+                self._update(remake_lookup_table=False)
+                return True
+
+            # Discard preedit text.
+            self._parser.clear()
+            self._update()
             return True
 
         else:

@@ -16,8 +16,6 @@
 
 - Make the release.
 
-- Add Esc key behavior.
-
 
 ## Low priority:
 
