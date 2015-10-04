@@ -6,8 +6,6 @@ import unicodedata
 from pkgutil import get_data
 from tempfile import NamedTemporaryFile
 
-import enchant
-from enchant.errors import DictNotFoundError
 from gi.repository import IBus, GLib
 from gi.repository.IBus import ModifierType as Mod
 
@@ -252,10 +250,19 @@ class EngineSphotik(IBus.Engine):
         # a fake dictionary object that does nothing.
         for d in self.enchant_dict_names:
             try:
-                self._enchant_dict = enchant.Dict(d)
+                import enchant
+
+                try:
+                    self._enchant_dict = enchant.Dict(d)
+                    break
+                except enchant.errors.DictNotFoundError:
+                    pass
+            except ImportError:
+                self._enchant_dict = _UselessEnchantDict()
+                print(
+                    "[Warning] Failed to find enchant binding for python."
+                    " Dictionary suggestions will not be available.")
                 break
-            except DictNotFoundError:
-                pass
         else:
             self._enchant_dict = _UselessEnchantDict()
             print(

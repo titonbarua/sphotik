@@ -4,10 +4,6 @@
 
 - Make the installer copy the source tree to "/opt/".
 
-- Make presence of a dictionary optional during installation.
-
-- Fix delete() method to act like normcursor.
-
 - Write installation documentation for users.
 
 - Add acknoweledgement.
@@ -18,6 +14,8 @@
 ## Low priority:
 
 - Implement the `special rule` system.
+
+- Fix delete() method to act like normcursor.
 
 
 ## Very low priority:
