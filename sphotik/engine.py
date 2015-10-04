@@ -74,6 +74,9 @@ INTERESTING_KEYS = set([getattr(IBus, c) for c in (
         "Right",
         "Up",
         "Down",
+
+        "Page_Up",
+        "Page_Down",
     ]
     + list(string.digits)
     + list(string.ascii_letters)
@@ -461,6 +464,22 @@ class EngineSphotik(IBus.Engine):
                 return False
 
             self._lookup_table_manager.cursor_down()
+            self._update(remake_lookup_table=False)
+            return True
+
+        elif keyval == IBus.Page_Up:
+            if not len(self._lookup_table_manager) > 0:
+                return False
+
+            self._lookup_table_manager.page_up()
+            self._update(remake_lookup_table=False)
+            return True
+
+        elif keyval == IBus.Page_Down:
+            if not len(self._lookup_table_manager) > 0:
+                return False
+
+            self._lookup_table_manager.page_down()
             self._update(remake_lookup_table=False)
             return True
 

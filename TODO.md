@@ -16,7 +16,7 @@
 
 - Make the release.
 
-- Add page-up/down key support.
+- Add Esc key behavior.
 
 
 ## Low priority:
