@@ -171,6 +171,13 @@ class ParserIbus(Parser):
                 suggest_without_flags(i, ('CONJOINED',))
                 break
 
+        # Find first (from left) consonant that is conjoined and
+        # suggest it to be disjoined.
+        for i, bead in enumerate(self.cord):
+            if 'CONJOINED' in bead.flags:
+                suggest_without_flags(i, ('CONJOINED',))
+                break
+
         # Shape of these vowels are usually ambiguous except at the
         # start of a word.
         vowels_to_modify = (
