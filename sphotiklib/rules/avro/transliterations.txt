@@ -73,6 +73,7 @@ t[MOD][MOD] # ৎ
 # Chandrabindu.
 ^ # \u0981
 ^^ # ^
+^[MOD] # ^
 
 # Onuskar.
 ng # \u0982
@@ -80,6 +81,7 @@ ng # \u0982
 # Bishorgo.
 : # \u0983
 :: # :
+:[MOD] # :
 
 # Daari.
 . # \u0964
