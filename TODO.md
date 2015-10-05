@@ -2,12 +2,6 @@
 
 ## High priority:
 
-- Write installation documentation for users.
-
-- Add acknoweledgement.
-
-- Make the release.
-
 
 ## Low priority:
 
