@@ -176,6 +176,7 @@ class ParserIbus(Parser):
         vowels_to_modify = (
             "\N{BENGALI LETTER I}",
             "\N{BENGALI LETTER II}",
+            "\N{BENGALI LETTER O}",
             "\N{BENGALI LETTER U}",
             "\N{BENGALI LETTER UU}",)
 
