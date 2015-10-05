@@ -35,7 +35,11 @@ class HistoryManager:
         self.session_history = deque(maxlen=session_history_size)
 
         if not os.path.isfile(histfilepath):
-            # Create database it it does not exist.
+            # Create the history file with proper permissions.
+            with open(histfilepath, "w") as f:
+                os.chmod(histfilepath, 0o600)
+
+            # Write database schema.
             self.conn = sqlite3.connect(histfilepath)
             with self.conn:
                 self.conn.execute(self.SCHEMA.strip())
