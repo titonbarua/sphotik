@@ -17,13 +17,13 @@
     কিনা। এর ভার্সন কমপক্ষে 3.4 হতে হবে। পাইথন-থ্রি এর ভার্সন চেক করার কমান্ডটি
     হলোঃ `python3 --version`।
 
-- এই [লিঙ্ক](https://bitbucket.org/titonbarua/sphotik/downloads/sphotik-v2.1.tar.gz)
+- এই [লিঙ্ক](https://bitbucket.org/titonbarua/sphotik/downloads/sphotik-v2.1.1.tar.gz)
     থেকে স্ফটিক এর স্ট্যাবল ভার্সন নামিয়ে নিন এবং কোন একটি জায়গায় ফাইলটি এক্সট্রাক্ট করুন।
     টার্মিনাল এর মাধ্যমে করতে চাইলেঃ 
-    `cd $HOME ; curl 'https://bitbucket.org/titonbarua/sphotik/downloads/sphotik-v2.1.tar.gz' | tar -vxz`
+    `cd $HOME && wget 'https://bitbucket.org/titonbarua/sphotik/downloads/sphotik-v2.1.1.tar.gz' -O sphotik-v2.1.1.tar.gz && tar -vxzf sphotik-v2.1.1.tar.gz`
 
 - একটি টার্মিনাল খুলুন এবং এক্সট্রাক্ট করা ডিরেক্টরীতে ঢুকুন।
-    `cd $HOME/sphotik-v2.1/`
+    `cd $HOME/sphotik-v2.1.1/`
 
 - রুট ইউজার হিসেবে ইন্সটলার স্ক্রিপ্টটি চালু করুনঃ `sudo python3 ./installer.py`।
     যদি কোন প্রয়োজনীয় লাইব্রেরী সিস্টেম এ পাওয়া না যায়, তবে স্ক্রিপ্টটি আপনাকে বলে দিবে।
