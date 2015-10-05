@@ -2,8 +2,6 @@
 
 ## High priority:
 
-- Make the installer copy the source tree to "/opt/".
-
 - Write installation documentation for users.
 
 - Add acknoweledgement.

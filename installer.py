@@ -4,12 +4,32 @@ import shutil
 import os.path
 import subprocess
 
-ibus_component_bank = "/usr/share/ibus/component/"
+INSTALLATION_PATH = "/opt/sphotik/"
+IBUS_COMPONENT_BANK = "/usr/share/ibus/component/"
+
+MANIFEST_FILENAME = "MANIFEST.in"
+ENGINE_FILENAME = "ibus_sphotik.py"
+IBUS_COMPONENT_FILENAME = "sphotik.xml"
+UNINSTALLER_FILENAME = "uninstaller.sh"
+VERSION_FILENAME = "VERSION.txt"
+
+INSTALLED_FILE_OWNER = 0
+INSTALLED_FILE_GROUP = 0
+INSTALLED_FILE_MODE = 0o755
 
 python_path = sys.executable
+
 source_dir = os.path.realpath(os.path.dirname(__file__))
-engine_path = os.path.join(source_dir, "ibus_sphotik.py")
-engine_command = "'{}' '{}' --ibus".format(python_path, engine_path)
+version_path = os.path.join(source_dir, VERSION_FILENAME)
+manifest_path = os.path.join(source_dir, MANIFEST_FILENAME)
+
+install_dir = INSTALLATION_PATH
+installed_engine_path = os.path.join(install_dir, ENGINE_FILENAME)
+installed_engine_command = "'{}' '{}' --ibus".format(
+    python_path, installed_engine_path)
+installed_ibus_component_path = os.path.join(
+    IBUS_COMPONENT_BANK, IBUS_COMPONENT_FILENAME)
+installed_uninstaller_path = os.path.join(install_dir, UNINSTALLER_FILENAME)
 
 # Check for python version.
 if not sys.version_info >= (3, 4):
@@ -23,18 +43,19 @@ python3.4 or higher using your distributions package management command:
     sys.exit(1)
 
 # Check if ibus is installed ( in a silly way ).
-if not os.path.isdir(ibus_component_bank):
+if not os.path.isdir(IBUS_COMPONENT_BANK):
     user_help = """
 [ ERROR ] Either IBus is not installed, or installed in non-standard location.
 For the first case, install IBus using system package manager:
     [ Ubuntu/Debian ]
         apt-get install ibus ibus-gtk ibus-gtk3 im-config
 
-For the second case, edit the installer script and setup "ibus_component_bank"
+For the second case, edit the installer script and setup "IBUS_COMPONENT_BANK"
 variable according to your IBus installation.
 """
     print(user_help.strip())
     sys.exit(2)
+
 
 # Let's try to import required gobject introspection repositories.
 try:
@@ -81,37 +102,67 @@ system package manager:
 """
     print(user_help.strip())
 
-# Time for manual file installation ...
+# Try to uninstall an existing installation.
+if os.path.isfile(installed_uninstaller_path):
+    print("Trying to uninstall existing installation ...")
+    subprocess.check_call([installed_uninstaller_path])
+
+
+# Real installation begins ...
 #--------------------------------------------------------------------\
-files_manually_installed = []
+files_installed = []
+
+# Copy source files to installation path.
+try:
+    with open(manifest_path) as f:
+        for fname in f:
+            fname = fname.strip()
+            if not fname:
+                continue
+
+            src = os.path.join(source_dir, fname)
+            dst = os.path.join(install_dir, fname)
+
+            dstdir = os.path.dirname(dst)
+            if not os.path.isdir(dstdir):
+                os.makedirs(dstdir, INSTALLED_FILE_MODE)
+
+            shutil.copyfile(src, dst, follow_symlinks=False)
+            os.chown(dst, INSTALLED_FILE_OWNER, INSTALLED_FILE_GROUP)
+            os.chmod(dst, INSTALLED_FILE_MODE)
+
+            files_installed.append(dst)
+            print("Installed '{}'".format(dst))
+
+except Exception as e:
+    print("[ ERROR ] Failed to install source files: {}".format(e))
+    sys.exit(5)
 
 # Install ibus component description file for sphotik.
 from sphotik.engine import render_component_template
 try:
-    version_file = os.path.join(os.path.dirname(__file__), "VERSION.txt")
-    with open(version_file) as f:
+    with open(version_path) as f:
         version = f.read().strip()
 
-    component_file = os.path.join(ibus_component_bank, "sphotik.xml")
-    with open(component_file, "w") as f:
+    with open(installed_ibus_component_path, "w") as f:
         f.write(render_component_template(
             version=version,
-            run_path=engine_command,
+            run_path=installed_engine_command,
             setup_path='',
             icon_path='',
         ))
 
-    os.chmod(component_file, 0o755)
-    files_manually_installed.append(component_file)
+    os.chmod(installed_ibus_component_path, 0o755)
+    files_installed.append(installed_ibus_component_path)
 except Exception as e:
     print("[ ERROR ] Failed to install ibus component file: {}".format(e))
-    sys.exit(5)
+    sys.exit(6)
 #--------------------------------------------------------------------/
 
 # Comfort the user, for she has jumped through such long hoops
 # with hopes of using this program! :V
 print("=" * 50 + "\nInstallation successful!\n" + "=" * 50)
-print("** DO NOT REMOVE THIS DIRECTORY: {} **".format(source_dir))
+print("** Sphotik installed to: {} **".format(install_dir))
 
 # Write uninstaller file.
 #-------------------------------------------------------------------\
@@ -120,13 +171,17 @@ UNINSTALLER_TEMPLATE = """\
 {file_removal_commands}
 """
 
-uninstaller_path = os.path.join(source_dir, "uninstaller.sh")
-with open(uninstaller_path, 'w') as f:
+with open(installed_uninstaller_path, 'w') as f:
     f.write(UNINSTALLER_TEMPLATE.format(
         file_removal_commands="\n".join([
-            "rm -v '{}'".format(x) for x in files_manually_installed]),
+            "if [ -f '{0}' ] ; then rm -v '{0}' ; fi"
+            .format(x) for x in files_installed]),
     ))
 
-os.chmod(uninstaller_path, 0o777)
+os.chown(
+    installed_uninstaller_path,
+    INSTALLED_FILE_OWNER,
+    INSTALLED_FILE_GROUP)
+os.chmod(installed_uninstaller_path, 0o755)
 #-------------------------------------------------------------------/
-print("Created uninstaller: {}".format(uninstaller_path))
+print("Created uninstaller: {}".format(installed_uninstaller_path))
