@@ -286,7 +286,8 @@ class EngineSphotik(IBus.Engine):
             self.update_lookup_table_fast(ltm.table, len(ltm) > 0)
             return
 
-        hist = self._history_manager.search(self._parser.input_text)
+        # hist = self._history_manager.search(self._parser.input_text)
+        hist = self._history_manager.search_without_punctuation(self._parser)
 
         # Add default text to suggestions.
         ltm.add_entry("default", hist[default_text], default_text)

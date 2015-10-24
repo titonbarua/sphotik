@@ -58,6 +58,28 @@ class HistoryManager:
     WHERE roman_text = :roman_text ORDER BY usecount DESC;
     """
 
+    def search_without_punctuation(self, parser):
+        # TODO: Fixup delete method so that this function
+        # works accurately for series of punctuations.
+        result = self.search(parser.input_text)
+
+        if len(parser.text) > 0:
+            text, puncs = parser.text, ""
+            while text[-1] in parser.rule.punctuations:
+                puncs = text[-1] + puncs
+                text = text[:-1]
+
+            if len(puncs) > 0:
+                alt_parser = parser.__class__(
+                    parser.rule, parser.cord, parser.insseq)
+                alt_parser.move_cursor_to_rightmost()
+                alt_parser.delete(-len(puncs))
+
+                for v, c in self.search(alt_parser.input_text).items():
+                    result[v + puncs] += c
+
+        return result
+
     def search(self, roman_text):
         return self._search(self.input_generalizer(roman_text))
 

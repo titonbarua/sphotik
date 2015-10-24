@@ -1,2 +1,2 @@
 # Collection of punctions to detect ward boundary.
-\u0964 ^ . , ( ) { } [ ] ' " ! ? # % + - ~ * & | / \
+\u0964 ^ . , ( ) { } [ ] ' " ! ? # % + - ~ * & | / \ ...
