@@ -63,20 +63,22 @@ class HistoryManager:
         # works accurately for series of punctuations.
         result = self.search(parser.input_text)
 
-        if len(parser.text) > 0:
+        try:
             text, puncs = parser.text, ""
             while text[-1] in parser.rule.punctuations:
                 puncs = text[-1] + puncs
                 text = text[:-1]
+        except IndexError:
+            pass
 
-            if len(puncs) > 0:
-                alt_parser = parser.__class__(
-                    parser.rule, parser.cord, parser.insseq)
-                alt_parser.move_cursor_to_rightmost()
-                alt_parser.delete(-len(puncs))
+        if len(puncs) > 0:
+            alt_parser = parser.__class__(
+                parser.rule, parser.cord, parser.insseq)
+            alt_parser.move_cursor_to_rightmost()
+            alt_parser.delete(-len(puncs))
 
-                for v, c in self.search(alt_parser.input_text).items():
-                    result[v + puncs] += c
+            for v, c in self.search(alt_parser.input_text).items():
+                result[v + puncs] += c
 
         return result
 
