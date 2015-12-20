@@ -119,7 +119,8 @@ aa AA # অ \u09CDয\u09BE
 raa rAA # র\u200D\u09CDয\u09BE
 
 # Emoticons, collected from ibus-avro autocorrect.js file.
-# No room for emoticons with '#' in them! :-#
+# The hash sign '#' is expressed with '[HASH]'
+:-[HASH] # :-[HASH]
 $-) # $-)
 (:| # (:|
 *) # *)

@@ -12,6 +12,7 @@ from .conjunction_parser import parse_conjunction_line
 class Rule:
     MODIFIER_FILE = 'modifier.txt'
     MODIFIER_MARK = '[MOD]'
+    HASH_MARK = '[HASH]'
     TRANSLITERATIONS_FILE = 'transliterations.txt'
     VOWELMAP_FILE = 'vowelmap.txt'
     CONSONANTS_FILE = 'consonants.txt'
@@ -152,6 +153,8 @@ class Rule:
                 continue
 
             parts = line.split('#', maxsplit=2)
+            # Unescape literal hash sign.
+            parts = [x.replace(self.HASH_MARK, '#') for x in parts]
             src = parts[0]
             dst = parts[1] if len(parts) > 1 else ''
             flags = parts[2] if len(parts) > 2 else ''
