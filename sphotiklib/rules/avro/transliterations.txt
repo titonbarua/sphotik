@@ -256,3 +256,19 @@ $-) # $-)
 ~:> # ~:>
 ~O) # ~O)
 ~X( # ~X(
+
+# Extra emoticons to use with facebook chat.
+:o # :o
+:O # :O
+:v # :v
+:V # :V
+:/ # :/
+^_^ # ^_^
+3:) # 3:)
+O:) # O:)
+o:) # o:)
+o.O # o.O
+>:o # >:o
+(y) # (y)
+(Y) # (Y)
+

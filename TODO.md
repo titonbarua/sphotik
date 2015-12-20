@@ -21,8 +21,6 @@
 - Enable detection of password input context,
   so that passwords won't go to history.
 
-- Add common facebook emoticons.
-
 - Add a logo.
 
 - Fix ibus component file having executable permission.
