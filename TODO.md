@@ -23,6 +23,4 @@
 
 - Add a logo.
 
-- Fix ibus component file having executable permission.
-
 - Add homepage link to ibus component file.

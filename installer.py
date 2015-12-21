@@ -152,7 +152,7 @@ try:
             icon_path='',
         ))
 
-    os.chmod(installed_ibus_component_path, 0o755)
+    os.chmod(installed_ibus_component_path, 0o644)
     files_installed.append(installed_ibus_component_path)
 except Exception as e:
     print("[ ERROR ] Failed to install ibus component file: {}".format(e))
