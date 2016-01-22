@@ -69,7 +69,8 @@ class Parser:
         preserved_left = revertible
 
         # Perform the transliteration.
-        reforged = self.transliterator(reverted + text)
+        reforged = self.transliterator(
+                preserved_left, reverted + text)
 
         # Attach insertion sequence to the reforged beads.
         for bead in reforged:

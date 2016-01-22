@@ -23,26 +23,26 @@ class ContextualModifier:
         else:
             return False
 
-    def __call__(self, converted, source_str):
+    def __call__(self, context, raw):
         # The format of contextuals is: (tuple, str, tuple)
-        for conv_targets, raw_target, result in self._contextual_rules:
+        for context_targets, raw_target, result in self._contextual_rules:
             # Match raw target.
-            if not source_str.startswith(raw_target):
+            if not raw.startswith(raw_target):
                 continue
 
-            # Match converted targets. Rough workflow is -
-            #   Start iterating targets(converted) from right side.
-            #   Choose equivalent subject from the actual converted
+            # Match context targets. Rough workflow is -
+            #   Start iterating targets(context) from right side.
+            #   Choose equivalent subject from the actual context
             #   string. If there is none, an special subject '[START]'
             #   is produced. Match the subject and target. If any match
             #   fails, we discard the rule.
             try:
                 failed = False
-                for i, t in enumerate(reversed(conv_targets)):
-                    if i == len(converted):
+                for i, t in enumerate(reversed(context_targets)):
+                    if i == len(context):
                         s = '[START]'
                     else:
-                        s = converted[-(i + 1)].v
+                        s = context[-(i + 1)].v
 
                     if not self._match(s, t):
                         failed = True
@@ -56,6 +56,6 @@ class ContextualModifier:
             # We have a match!
             src_bead = SrcBead(raw_target)
             dst_beads = [DstBead(c, src_bead) for c in result]
-            return converted + Cord(dst_beads), source_str[len(raw_target):]
+            return Cord(dst_beads), raw[len(raw_target):]
 
-        return converted, source_str
+        return Cord(), raw
