@@ -10,6 +10,7 @@ class TreeNode:
         self.value = value
         self.parent = parent
         self.children = {}
+        self.longest_subpath_size = 0
 
         if parent is None:
             self.key = 'root'
@@ -17,17 +18,25 @@ class TreeNode:
         else:
             self.parent.children[key] = self
 
-        self.longest_subpath_size = self.calc_longest_subpath_size()
-
     def set_value_for_path(self, path, value):
+        # Follow the path.
         current_node = self
         for key in path:
             current_node = (
                 current_node.children[key]
                 if key in current_node.children
                 else TreeNode(key=key, value=None, parent=current_node))
+
+        # Set value for path.
         current_node.value = value
-        self.longest_subpath_size = self.calc_longest_subpath_size()
+
+        # Update longest_subpath_size for self and all the ancestors.
+        parent = self
+        while parent is not None:
+            parent.longest_subpath_size += len(path)
+            parent = parent.parent
+
+        # Return the node where value was attached.
         return current_node
 
     def get_value_for_path(self, path):
@@ -59,7 +68,9 @@ class TreeNode:
 
         return path
 
-    def calc_longest_subpath_size(self):
+    # This method is deprecated. Instead, the calculation is done
+    # while setting the values with set_value_for_path() function.
+    def get_longest_subpath_size(self):
         result = 0
         nodes = deque([(self, 0)])
 
