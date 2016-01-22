@@ -7,8 +7,6 @@
 
 - Add a release-packer.
 
-- Implement the `special rule` system.
-
 - Fix delete() method to act like normcursor.
 
 

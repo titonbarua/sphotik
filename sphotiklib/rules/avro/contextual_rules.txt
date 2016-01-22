@@ -1,0 +1,9 @@
+# Context aware rules for transliteration.
+[START] # y # ইয়
+
+[VOWEL] # a # য়া
+[VOWEL] # A # য়া
+
+[CONSONANT] # y # য
+[CONSONANT] # w # ব
+

@@ -9,6 +9,7 @@ from .conjunctor import Conjunctor
 from .vowelshaper import Vowelshaper
 from .utils import SrcBead, DstBead, Cord
 from .transliterator import Transliterator
+from .contextual_modifier import ContextualModifier
 from .conjunction_parser import parse_conjunction_line
 
 
@@ -23,7 +24,7 @@ class Rule:
     PUNCTUATIONS_FILE = 'punctuations.txt'
     CONJUNCTIONS_FILE = 'conjunctions.txt'
     CONJUNCTION_GLUE_FILE = 'conjunction_glue.txt'
-    SPECIAL_RULES_FILE = 'special_rules.txt'
+    CONTEXTUAL_RULES_FILE = 'contextual_rules.txt'
 
     def __init__(self, rulename):
         ruledir = pjoin('rules', rulename)
@@ -44,7 +45,7 @@ class Rule:
         self.vowelhosts = set()
         self.punctuations = set()
 
-        self.special_rules = []
+        self.contextual_rules = []
 
         fdata = get_data(
             __package__, pjoin(ruledir, self.MODIFIER_FILE)).decode()
@@ -85,10 +86,13 @@ class Rule:
         self.conjglue = self._parse_char(fdata)
 
         fdata = get_data(
-            __package__, pjoin(ruledir, self.SPECIAL_RULES_FILE)).decode()
-        self.special_rules = self._parse_special_rules(fdata)
+            __package__, pjoin(ruledir, self.CONTEXTUAL_RULES_FILE)).decode()
+        self.contextual_rules = self._parse_contextual_rules(fdata)
 
-        self.transliterator = Transliterator(self.transtree)
+        self.transliterator = Transliterator(
+            self.transtree,
+                ContextualModifier(
+                    self.contextual_rules, self.vowels, self.consonants))
         self.vowelshaper = Vowelshaper(self.vowels, self.vowelhosts)
         self.conjunctor = Conjunctor(self.conjtree)
 
@@ -118,8 +122,8 @@ class Rule:
             "\n\t\t".join(
                 str(
                     self.transtree).splitlines()) +
-            "\n\tspecial_rules:\n\t\t" +
-            "\n\t\t".join(map(str, self.special_rules)))
+            "\n\tcontextual_rules:\n\t\t" +
+            "\n\t\t".join(map(str, self.contextual_rules)))
 
     _ESCAPED_UNICHAR_REGEX = re.compile(r'\\u[0-9A-F]{4}', re.I)
 
@@ -213,7 +217,7 @@ class Rule:
 
         return chars
 
-    def _parse_special_rules(self, text):
+    def _parse_contextual_rules(self, text):
         rules = []
 
         for line in text.splitlines():
@@ -223,11 +227,15 @@ class Rule:
                 continue
 
             try:
-                src, dst = line.split('#', maxsplit=1)
+                conv, raw, result = line.split('#', maxsplit=2)
             except ValueError:
-                src, dst = line, ''
+                conv, raw = line.split('#', maxsplit=1)
+                result = ''
 
-            rules.append((tuple(src.split()), tuple(dst.split())))
+            rules.append((
+                tuple(conv.split()),
+                ''.join(raw.split()),
+                tuple(result.split())))
 
         return rules
 

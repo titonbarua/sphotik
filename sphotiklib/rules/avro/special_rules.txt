@@ -1,5 +1,0 @@
-# Special rules for transliterations.
-[START] y # ই য়
-[CONSONANT] y # য
-[CONSONANT] w # ব
-

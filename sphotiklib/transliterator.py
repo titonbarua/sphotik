@@ -9,8 +9,9 @@ from .utils import SrcBead, DstBead, Cord
 
 class Transliterator:
 
-    def __init__(self, tree):
+    def __init__(self, tree, contextual_modifier):
         self._tree = tree
+        self._contextual_modifier = contextual_modifier
         self.longest_path_size = tree.longest_subpath_size
 
     def _transliterate_a_letter(self, source_str):
@@ -39,9 +40,16 @@ class Transliterator:
 
     def _transliterate(self, source_str):
         converted = Cord()
-        while source_str:
+        while True:
+            converted, source_str = self._contextual_modifier(
+                converted, source_str)
+            if len(source_str) == 0:
+                break
+
             newconv, source_str = self._transliterate_a_letter(source_str)
             converted += newconv
+            if len(source_str) == 0:
+                break
 
         return converted
 
