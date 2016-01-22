@@ -69,6 +69,7 @@ INTERESTING_KEYS = set([getattr(IBus, c) for c in (
         "period",
         "question",
         "slash",
+        "backslash",
 
         "Left",
         "Right",
