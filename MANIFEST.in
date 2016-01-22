@@ -14,6 +14,7 @@ sphotik/sphotik.xml.tmpl
 
 sphotiklib/__init__.py
 sphotiklib/conjunction_parser.py
+sphotiklib/contextual_modifier.py
 sphotiklib/conjunctor.py
 sphotiklib/example.py
 sphotiklib/parser.py
@@ -27,7 +28,7 @@ sphotiklib/rules/avro/conjunctions.txt
 sphotiklib/rules/avro/consonants.txt
 sphotiklib/rules/avro/modifier.txt
 sphotiklib/rules/avro/punctuations.txt
-sphotiklib/rules/avro/special_rules.txt
+sphotiklib/rules/avro/contextual_rules.txt
 sphotiklib/rules/avro/transliterations.txt
 sphotiklib/rules/avro/vowelhosts.txt
 sphotiklib/rules/avro/vowelmap.txt
