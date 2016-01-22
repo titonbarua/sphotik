@@ -17,6 +17,8 @@ class TreeNode:
         else:
             self.parent.children[key] = self
 
+        self.longest_subpath_size = self.calc_longest_subpath_size()
+
     def set_value_for_path(self, path, value):
         current_node = self
         for key in path:
@@ -25,6 +27,7 @@ class TreeNode:
                 if key in current_node.children
                 else TreeNode(key=key, value=None, parent=current_node))
         current_node.value = value
+        self.longest_subpath_size = self.calc_longest_subpath_size()
         return current_node
 
     def get_value_for_path(self, path):
@@ -56,20 +59,20 @@ class TreeNode:
 
         return path
 
-    def get_longest_subpath_size(self):
-        def collect_subpath_size(node, path_size):
+    def calc_longest_subpath_size(self):
+        result = 0
+        nodes = deque([(self, 0)])
+
+        while len(nodes):
+            node, path_size = nodes.pop()
+
             if len(node.children) == 0:
-                return [path_size]
+                result = max(result, path_size)
+            else:
+                for child in node.children.values():
+                    nodes.appendleft((child, path_size + 1))
 
-            return reduce(
-                operator.add,
-                [
-                    collect_subpath_size(cn, path_size + 1)
-                    for cn in node.children.values()
-                ]
-            )
-
-        return max(collect_subpath_size(self, 0))
+        return result
 
     def transform(self, func):
         """ Traverse through all the paths with values in the

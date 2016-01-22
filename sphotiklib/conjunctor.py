@@ -8,7 +8,7 @@ class Conjunctor:
 
     def __init__(self, conjtree):
         self.conjtree = conjtree
-        self.longest_conj_size = conjtree.get_longest_subpath_size()
+        self.longest_conj_size = conjtree.longest_subpath_size
 
     def _make_a_conjunction(self, unjoined_cord):
         candidate = unjoined_cord[:self.longest_conj_size]

@@ -2,19 +2,16 @@
 import unittest
 
 from .ruleparser import Rule
-from .conjunctor import Conjunctor
-from .vowelshaper import Vowelshaper
 from .utils import SrcBead, DstBead, Cord
-from .transliterator import Transliterator
 
 
 class Parser:
 
     def __init__(self, rule, cord=Cord(), insertion_sequence=0):
         self.rule = rule
-        self.transliterator = Transliterator(rule.transtree)
-        self.vowelshaper = Vowelshaper(rule.vowels, rule.vowelhosts)
-        self.conjunctor = Conjunctor(rule.conjtree)
+        self.transliterator = rule.transliterator
+        self.vowelshaper = rule.vowelshaper
+        self.conjunctor = rule.conjunctor
         self.cord = self._adjust_flags(cord)
         self.cursor = len(self.cord)
 

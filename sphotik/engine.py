@@ -235,7 +235,8 @@ class EngineSphotik(IBus.Engine):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._parser = ParserIbus(Rule(self.ruleset_name))
+        self._rule = Rule(self.ruleset_name)
+        self._parser = ParserIbus(self._rule)
         self._history_manager = HistoryManager(self.history_file_path)
         self._lookup_table_manager = LookupTableManager(
             self.lookup_table_page_size,
@@ -392,7 +393,7 @@ class EngineSphotik(IBus.Engine):
 
             # Do commit.
             self.commit_text(self._parser._render_itext(to_commit))
-            self._parser = ParserIbus(self._parser.rule, to_retain, 0)
+            self._parser = ParserIbus(self._rule, to_retain, 0)
 
             # Save history.
             self._history_manager.save(*history_entry)

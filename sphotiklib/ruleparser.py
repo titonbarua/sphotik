@@ -5,7 +5,10 @@ from pkgutil import get_data
 from os.path import join as pjoin
 
 from .tree import TreeNode
+from .conjunctor import Conjunctor
+from .vowelshaper import Vowelshaper
 from .utils import SrcBead, DstBead, Cord
+from .transliterator import Transliterator
 from .conjunction_parser import parse_conjunction_line
 
 
@@ -84,6 +87,10 @@ class Rule:
         fdata = get_data(
             __package__, pjoin(ruledir, self.SPECIAL_RULES_FILE)).decode()
         self.special_rules = self._parse_special_rules(fdata)
+
+        self.transliterator = Transliterator(self.transtree)
+        self.vowelshaper = Vowelshaper(self.vowels, self.vowelhosts)
+        self.conjunctor = Conjunctor(self.conjtree)
 
         logging.debug(
             "Parsed rules from '{}':\n\t".format(ruledir) +

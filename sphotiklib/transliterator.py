@@ -11,7 +11,7 @@ class Transliterator:
 
     def __init__(self, tree):
         self._tree = tree
-        self.longest_path_size = tree.get_longest_subpath_size()
+        self.longest_path_size = tree.longest_subpath_size
 
     def _transliterate_a_letter(self, source_str):
         candidate = source_str[:self.longest_path_size]
