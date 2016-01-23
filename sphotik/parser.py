@@ -57,7 +57,7 @@ class ParserIbus(Parser):
         return self._render_itext(self.cord)
 
     def _render_itext(self, cord):
-        return IBus.Text.new_from_string(super()._render_text(cord))
+        return IBus.Text.new_from_string(super().render_text(cord))
 
     @property
     def preedit_itext(self):
@@ -131,13 +131,13 @@ class ParserIbus(Parser):
         return self._render_auxiliary_itext(self.cord)
 
     def _render_auxiliary_itext(self, cord):
-        return IBus.Text.new_from_string(self._render_input_text(cord))
+        return IBus.Text.new_from_string(self.render_input_text(cord))
 
     @property
     def input_text(self):
-        return self._render_input_text(self.cord)
+        return self.render_input_text(self.cord)
 
-    def _render_input_text(self, cord):
+    def render_input_text(self, cord):
         srcbeads = []
         for i, bead in enumerate(cord):
             if not i == 0:
@@ -162,7 +162,7 @@ class ParserIbus(Parser):
             newbead.remove_flags(*flags_to_remove)
 
             newcord = self.cord[:index] + newbead + self.cord[index + 1:]
-            suggestions.append(self._render_text(newcord))
+            suggestions.append(self.render_text(newcord))
 
         # Find first (from right) consonant that is conjoined and
         # suggest it to be disjoined.

@@ -58,29 +58,37 @@ class HistoryManager:
     WHERE roman_text = :roman_text ORDER BY usecount DESC;
     """
 
+    def _split_trailing_punctuations_from_cord(self, cord, puncs):
+        split_at = len(cord)
+        for bead in reversed(cord):
+            if bead.v in puncs:
+                split_at += -1
+            else:
+                break
+
+        return cord[:split_at], cord[split_at:]
+
     def search_without_punctuation(self, parser):
-        # TODO: Fixup delete method so that this function
-        # works accurately for series of punctuations.
-        result = self.search(parser.input_text)
+        # Collect with-punctuation search results.
+        results = self.search(parser.input_text)
 
-        try:
-            text, puncs = parser.text, ""
-            while text[-1] in parser.rule.punctuations:
-                puncs = text[-1] + puncs
-                text = text[:-1]
-        except IndexError:
-            pass
+        # Split the cord into a punctuation-less head
+        # and a punctuation tail.
+        head, tail = self._split_trailing_punctuations_from_cord(
+            parser.cord, parser.rule.punctuations)
 
-        if len(puncs) > 0:
-            alt_parser = parser.__class__(
-                parser.rule, parser.cord, parser.insseq)
-            alt_parser.move_cursor_to_rightmost()
-            alt_parser.delete(-len(puncs))
+        # Workflow:
+        #   - Extract strings from punctuation-less head
+        #     and punctuation tail.
+        #   - Find outputs for punctuation-trimmed input.
+        #   - Join back the punctuation to the suggested output.
+        input_t = parser.render_input_text(tail)
+        if len(input_t) > 0:
+            input_h = parser.render_input_text(head)
+            for output, count in self.search(input_h).items():
+                results[output + parser.render_text(tail)] = count
 
-            for v, c in self.search(alt_parser.input_text).items():
-                result[v + puncs] += c
-
-        return result
+        return results
 
     def search(self, roman_text):
         return self._search(self.input_generalizer(roman_text))
@@ -139,6 +147,31 @@ class HistoryManager:
     UPDATE history SET usecount = usecount + 1
     WHERE roman_text = :roman_text AND bangla_text = :bangla_text;
     """
+
+    def _split_trailing_punctuations_from_text(self, text, puncs):
+        split_at = len(text)
+        for c in reversed(text):
+            if c in puncs:
+                split_at += -1
+            else:
+                break
+
+        return text[:split_at], text[split_at:]
+
+    def save_without_punctuation(self, parser, bangla_text):
+        # Save with punctuation.
+        self.save(parser.input_text, bangla_text)
+
+        # Get punctuationless head from the input.
+        inp_head, _ = self._split_trailing_punctuations_from_cord(
+            parser.cord, parser.rule.punctuations)
+
+        # Get punctuationless head from the output.
+        outp_head, _ = self._split_trailing_punctuations_from_text(
+            bangla_text, parser.rule.punctuations)
+
+        # Save without punctuation.
+        self.save(parser.render_input_text(inp_head), outp_head)
 
     def save(self, roman_text, bangla_text):
         return self._save(self.input_generalizer(roman_text), bangla_text)

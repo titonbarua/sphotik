@@ -19,7 +19,7 @@ class Parser:
         # integer that is incremented everytime an insertion is made.
         # Also, an inserted bead has this number attached to it, so
         # that beads inserted in sequence can be related with one another.
-        # 
+        #
         # This is important for inserting new characters in the middle, as
         # without it, we have will either have to revert unrelated characters
         # inserted in a different context or sacrifice multi-character
@@ -70,7 +70,7 @@ class Parser:
 
         # Perform the transliteration.
         reforged = self.transliterator(
-                preserved_left, reverted + text)
+            preserved_left, reverted + text)
 
         # Attach insertion sequence to the reforged beads.
         for bead in reforged:
@@ -103,9 +103,9 @@ class Parser:
 
     @property
     def text(self):
-        return self._render_text(self.cord)
+        return self.render_text(self.cord)
 
-    def _render_text(self, cord):
+    def render_text(self, cord):
         output = ""
         for bead in cord:
             # Change vowels to diacritic form when flagged.

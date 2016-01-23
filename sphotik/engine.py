@@ -354,30 +354,29 @@ class EngineSphotik(IBus.Engine):
         if type_ == 'default':
             return False
 
-        # Prepare history entry.
-        history_entry = (self._parser.input_text, itext.get_text())
-
         # Do commit.
         self.commit_text(itext)
-        self._parser.clear()
 
         # Save history.
-        self._history_manager.save(*history_entry)
+        self._history_manager.save_without_punctuation(
+            self._parser, itext.get_text())
+
+        # Clear parser.
+        self._parser.clear()
 
         return True
 
     def _commit(self):
         if not self._commit_from_lookup_table():
-            # Prepare history entry.
-            history_entry = (
-                self._parser.input_text, self._parser.text)
-
             # Do commit.
             self.commit_text(self._parser.itext)
-            self._parser.clear()
 
             # Save history.
-            self._history_manager.save(*history_entry)
+            self._history_manager.save_without_punctuation(
+                self._parser, self._parser.text)
+
+            # Clear parser.
+            self._parser.clear()
 
     def _commit_upto_cursor(self):
         if not self._commit_from_lookup_table():
@@ -386,17 +385,15 @@ class EngineSphotik(IBus.Engine):
             to_commit = self._parser.cord[:cursor]
             to_retain = self._parser.cord[cursor:]
 
-            # Prepare history entry.
-            history_entry = (
-                self._parser._render_input_text(to_commit),
-                self._parser._render_text(to_commit))
-
             # Do commit.
             self.commit_text(self._parser._render_itext(to_commit))
-            self._parser = ParserIbus(self._rule, to_retain, 0)
 
             # Save history.
-            self._history_manager.save(*history_entry)
+            self._history_manager.save_without_punctuation(
+                self._parser, self._parser.render_text(to_commit))
+
+            # Create new parser with uncommited text.
+            self._parser = ParserIbus(self._rule, to_retain, 0)
 
     def _idle_update(self):
         """

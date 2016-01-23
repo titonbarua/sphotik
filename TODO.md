@@ -20,6 +20,3 @@
 - Add a logo.
 
 - Add homepage link to ibus component file.
-
-- Need fix: Saving history of a word 'with punctuation' does
-            not help resolve the word 'without punctuation'.
