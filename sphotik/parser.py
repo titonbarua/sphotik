@@ -10,11 +10,47 @@ class ParserIbus(Parser):
     preedit_cursor_alt = ('+', 0x555555, 0xBBFFBB)
     preedit_cursor_enabled = True
 
-    chars_to_skip_while_moving = set(["\u09CD"])
+    # TODO: Move these parameters to rule files.
+    unaccounted_in_deletion = set(["\u09CD", "`"])
+    unaccounted_in_cursor_movement = set(["\u09CD", "`"])
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.chars_to_skip_while_moving.add(self.rule.modifier)
+
+    def delete(self, steps):
+        """Delete characters, but don't count metachars."""
+        taken_steps = 0
+        target_steps = steps
+
+        if target_steps > 0:
+            start, end = self.cursor, self.cursor
+            while target_steps > 0:
+                try:
+                    end += 1
+                    taken_steps += 1
+                    if self.cord[end].v not in self.unaccounted_in_deletion:
+                        target_steps += -1
+
+                except IndexError:
+                    break
+        else:
+            start, end = self.cursor, self.cursor
+            while target_steps < 0:
+                try:
+                    start = max(0, start - 1)
+                    taken_steps += 1
+                    if self.cord[start].v not in self.unaccounted_in_deletion:
+                        target_steps += 1
+
+                except IndexError:
+                    break
+
+        self.cord = self.cord[:start] + self.cord[end:]
+        self.cursor = (
+            max(0, self.cursor - taken_steps)
+                if (steps < 0) else self.cursor)
+
+        self.cord = self._adjust_flags(self.cord)
 
     @property
     def normcursor(self):
@@ -35,7 +71,7 @@ class ParserIbus(Parser):
                 try:
                     self.cursor += 1
                     v = self.cord[self.cursor].v
-                    if v not in self.chars_to_skip_while_moving:
+                    if v not in self.unaccounted_in_cursor_movement:
                         steps += -1
                 except IndexError:
                     break
@@ -44,7 +80,7 @@ class ParserIbus(Parser):
                 try:
                     self.cursor += -1
                     v = self.cord[self.cursor].v
-                    if v not in self.chars_to_skip_while_moving:
+                    if v not in self.unaccounted_in_cursor_movement:
                         steps += 1
 
                 except IndexError:

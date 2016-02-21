@@ -2,12 +2,12 @@
 
 ## High priority:
 
+- Implement a way to write different forms of 'RA conj YA'.
+
 
 ## Low priority:
 
 - Add a release-packer.
-
-- Fix delete() method to act like normcursor.
 
 
 ## Very low priority:
