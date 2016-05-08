@@ -432,18 +432,35 @@ class EngineSphotik(IBus.Engine):
         if keyval not in INTERESTING_KEYS:
             return False
 
-        if state & STATES_TO_IGNORE:
+        elif state & STATES_TO_IGNORE:
             return False
 
-        if state & STATES_TO_COMMIT_ASAP:
+        elif state & STATES_TO_COMMIT_ASAP:
             self._commit()
             self._update()
             return False
 
-        if keyval in (IBus.space, IBus.Return):
+        elif keyval == IBus.space:
+            keystr = IBus.keyval_to_unicode(keyval)
+            self._parser.insert(keystr)
             self._commit_upto_cursor()
             self._update()
-            return False
+            return True
+
+        elif keyval == IBus.Return:
+            if len(self._parser.cord) > 0:
+                self._commit_upto_cursor()
+                self._update()
+                # This is a work around for Skype on Linux v4.3.0.37.
+                # Skype discards any CR char at the end of commit text.
+                # But if a commit is made while the CR is left unhandled,
+                # the CR appears before the committed text in the chatlog.
+                # As a work around, we don't let skype handle the original
+                # CR, commit current buffer and then generate an spurious CR.
+                self.forward_key_event(keyval, keycode, state)
+                return True
+            else:
+                return False
 
         elif keyval == IBus.Tab:
             if len(self._parser.cord) == 0:
