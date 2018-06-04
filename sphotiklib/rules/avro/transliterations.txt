@@ -118,6 +118,8 @@ njh # ঞ  ঝ
 aa AA # অ \u09CDয\u09BE
 raa rAA # র\u200D\u09CDয\u09BE
 
+rry rrz # র\u200D\u09CDয
+
 # Emoticons, collected from ibus-avro autocorrect.js file.
 # The hash sign '#' is expressed with '[HASH]'
 :-[HASH] # :-[HASH]
